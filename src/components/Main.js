@@ -12,8 +12,9 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { Table, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
-const App = () => {
+const Main = () => {
   const [data, setData] = useState('');
   const [loading, setLoading] = useState(true);
   const [agentData, setAgentData] = useState({
@@ -134,7 +135,7 @@ const App = () => {
                 {data.map(agent => (
                   <Tr key={agent.id}>
                     <Td>{agent.id}</Td>
-                    <Td>{agent.agent_name}</Td>
+                    <Link to={`/${agent.id}`}><Td>{agent.agent_name}</Td></Link>
                     <Td>{agent.description}</Td>
                     <Td>{agent.system_prompt}</Td>
                     <Td>
@@ -158,4 +159,4 @@ const App = () => {
   );
 }
 
-export default App;
+export default Main;
