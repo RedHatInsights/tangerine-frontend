@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom"
+import { TextContent, Text, TextVariants } from "@patternfly/react-core"
 
 function Agent() {
     const { agentId } = useParams()
@@ -6,7 +7,9 @@ function Agent() {
     return(
         <>
             <Link to="/">Back</Link>
-            <h1>Agent: {agentId} </h1>
+            <TextContent>
+                <Text component={TextVariants.h1}>Agent: {agentId}</Text>
+            </TextContent>
         </>
     )
 }
