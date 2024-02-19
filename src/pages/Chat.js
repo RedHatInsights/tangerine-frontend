@@ -10,10 +10,8 @@ function Chat() {
     const [chatInput, setChatInput] = useState('')
 
     const addMessage = (sender, message) => {
-        const allMessages = [...messages]
-        allMessages.push({sender: sender, text: message})
-        setMessages(allMessages)
-        console.log(messages);
+        const messageToAdd = {sender: sender, text: message}
+        setMessages(prevMessages => [...prevMessages, messageToAdd])
     }
 
     const handleChatKeyDown = (event) => {
@@ -21,8 +19,6 @@ function Chat() {
             addMessage('human', chatInput)
             setChatInput('')
             sendChatMessage()
-            console.log(chatInput)
-            console.log(messages)
         }
     }
 
@@ -34,8 +30,6 @@ function Chat() {
         axios.get(`/agents/${agentId}`)
           .then(response => {
             setAgentInfo(response.data)
-            console.log("response:", response.data)
-            //  setLoading(false);
           })
           .catch(error => {
             console.error('Error fetching agents:', error);
@@ -44,68 +38,52 @@ function Chat() {
 
     const sendChatMessage = async () => {
         // Make a POST request with streaming response
-        fetch(`/agents/${agentId}/chat`, {
-            method: 'POST',
+        const response = await fetch(`/agents/${agentId}/chat`, {
+            method: "POST",
             headers: {
-            'Content-Type': 'application/json'
-            // Add any other headers as needed
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                // Add your request payload here if needed
-                query: chatInput, stream: "true"
+                query: chatInput,
+                stream: "true",
             })
         })
-        .then(response => {
-            // Check if the response is OK
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            
-            // Get a ReadableStream from the response body
-            const reader = response.body.getReader();
-        
-            // Define a function to read from the stream
-            const readStream = () => {
-                reader.read().then(({ done, value }) => {
-                    // Check if the stream has ended
-                    if (done) {
-                        console.log('Stream complete');
-                        return;
-                    }
-            
-                    // Handle the chunk of data received from the stream
-                    console.log('Received chunk:', value);
-            
-                    // Continue reading from the stream
-                    readStream();
-                }).catch(error => {
-                    console.error('Error reading stream:', error);
-                });
-            };
-        
-            // Start reading from the stream
-            readStream();
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-        });
-  
-        // const response = axios.post(`/agents/${agentId}/chat`, {query: chatInput, stream: "true"}, {responseType: "stream"})
-        
-        // const stream = response.data;
 
-        // stream.on('data', data => {
-        //     console.log(data);
-        // });
-        // .then((response) => {
-        //     console.log("response: ", response)
-        //     // const allMessages = [...messages]
-        //     // allMessages.push({sender: "ai", text: response.data.text_content})
-        //     // setMessages(allMessages)
-        // })
-        // .catch(error => {
-        //     console.error('Error adding agent:', error);
-        // })
+        const reader = response.body.pipeThrough(new TextDecoderStream("utf-8")).getReader();
+        while(true) {
+            const chunk = await reader.read();
+            const {done, value} = chunk;
+
+            if (done) {
+                break;
+            }
+
+            // const decodedChunk = decoder.decode(value)
+            const lines = value.split("\n");
+
+            const parsedLines = lines.map((line) => {
+                if (line.length > 0) {
+                    return JSON.parse(line)
+                }
+                return {text_content: '\n'}
+            })
+
+            for (const parsedLine of parsedLines) {
+                const { text_content } = parsedLine;
+                if (text_content) {
+                    setMessages((prevMessages) => {
+                        const lastMessage = prevMessages[prevMessages.length - 1]
+                        if (lastMessage.sender !== "ai") {
+                            const newMessage = {sender: "ai", text: text_content}
+                            return [...prevMessages, newMessage]
+                        }
+                        const updatedMessages = [...prevMessages];
+                        updatedMessages[updatedMessages.length - 1].text += text_content
+                        return updatedMessages;
+                    })
+                }
+            }
+        }
     };
 
 
@@ -117,7 +95,7 @@ function Chat() {
             </TextContent>
             <TextContent id="all-messages">
                 {
-                    messages.map((message, index) => (
+                    messages && messages.map((message, index) => (
                         <TextContent key={index}>
                             <Text component={TextVariants.h4}>{message.sender}</Text>
                             <Text component={TextVariants.p}>{message.text}</Text>
