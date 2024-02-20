@@ -17,7 +17,6 @@ import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
 
 import AddCircleIcon from "@patternfly/react-icons/dist/esm/icons/add-circle-o-icon"
-import ChatIcon from "@patternfly/react-icons/dist/esm/icons/comments-icon"
 
 const Main = () => {
   const [data, setData] = useState('');
@@ -96,19 +95,6 @@ const Main = () => {
       })
   }
 
-  const uploadFile = (agent) => {
-    const file = agent.target.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-    axios.post('/agents/' + agent.target.id + '/document_upload', formData)
-      .then(() =>
-        getAgents()
-      )
-      .catch(error => {
-        console.error('Error uploading file:', error);
-      })
-  }
-
   return (
     <Panel>
       <PanelMain>
@@ -116,13 +102,14 @@ const Main = () => {
           {loading ? (
               <p>Loading Agents...</p>
           ) : (
-            <div style={{"width": "95%", "display": "flex", "flex-direction": "column"}}>
-              <div style={{"display": "flex", "justifyContent": "end"}}>
+            <div style={{"width": "90%", "display": "flex", "flex-direction": "column", "marginLeft": "2.5rem"}}>
+              <div style={{"display": "flex", "justifyContent": "end", "paddingTop": "0.5rem"}}>
                 <Button variant="primary" onClick={handleModalToggle} icon={<AddCircleIcon/>}>
                   Add Agent
                 </Button>
               </div>
-              <Title headingLevel="h1">Agents</Title>
+              <div style={{"marginTop": "2.5rem"}}>
+              <Title headingLevel="h1" style={{"paddingBottom": "1.5rem"}}>Available Agents</Title>
               <Table aria-label="Simple table">
               <Thead>
                 <Tr>
@@ -149,6 +136,7 @@ const Main = () => {
                 ))}
               </Tbody>
               </Table>
+              </div>
               <Modal
                 variant={ModalVariant.small}
                 title="Create a new Agent"

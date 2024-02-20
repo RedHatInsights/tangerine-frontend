@@ -89,29 +89,39 @@ function Chat() {
 
     return (
         <>
-            <TextContent>
+            <TextContent style={{"marginLeft": "10rem", "paddingTop": "2rem", "paddingBottom": "2rem"}}>
                 <Text component={TextVariants.h1}>Chat with {agentInfo.agent_name}</Text>
                 <Text component={TextVariants.p}>{agentInfo.description}</Text>
             </TextContent>
-            <TextContent id="all-messages">
-                {
-                    messages && messages.map((message, index) => (
-                        <TextContent key={index}>
-                            <Text component={TextVariants.h4}>{message.sender === "ai" ? agentInfo.agent_name : message.sender}</Text>
-                            <Text component={TextVariants.p}>{message.text}</Text>
-                        </TextContent>
-                    ))
-                }
-            </TextContent>
-            <TextInput
-                type="text"
-                value={chatInput}
-                id="agent-chat-input"
-                name="agent-chat-input"
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={handleChatKeyDown}
-                placeholder="Write a message to the agent. Press ENTER to send..."
-            />
+            <div>
+                <div class="pf-v5-c-panel pf-m-scrollable" style={{"marginLeft": "10rem", "marginRight": "15rem", "display": "flex", "flexDirection": "column", "justifyContent": "space-around"}}>
+                    <div class="pf-v5-c-panel__main" style={{"minHeight": "70vh"}}>
+                        <div class="pf-v5-c-panel__main-body">
+                            <TextContent id="all-messages">
+                                {
+                                    messages && messages.map((message, index) => (
+                                        <TextContent key={index} style={{"paddingBottom": "1rem"}}>
+                                            <Text component={TextVariants.h3}>{message.sender === "ai" ? agentInfo.agent_name : message.sender}</Text>
+                                            <Text component={TextVariants.p}>{message.text}</Text>
+                                        </TextContent>
+                                    ))
+                                }
+                            </TextContent>
+                        </div>
+                    </div>
+                    <div class="pf-v5-c-panel__footer" style={{"width": "100%"}}>
+                        <TextInput
+                            type="text"
+                            value={chatInput}
+                            id="agent-chat-input"
+                            name="agent-chat-input"
+                            onChange={(e) => setChatInput(e.target.value)}
+                            onKeyDown={handleChatKeyDown}
+                            placeholder="Write a message to the agent. Press ENTER to send..."
+                        />
+                    </div>
+                </div>
+            </div>
         </>
     )
 }

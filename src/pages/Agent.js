@@ -46,19 +46,19 @@ function Agent() {
             </div>
             <TextContent style={{"paddingTop": "2rem", "paddingBottom": "2rem", "display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "30rem"}}>
                 <TextContent>
-                    <Text component={TextVariants.h3}>Agent Name</Text>
+                    <Text component={TextVariants.h2}>Agent Name</Text>
                     <Text component={TextVariants.p}>{agentInfo.agent_name}</Text>
                 </TextContent>
                 <TextContent>
-                    <Text component={TextVariants.h3}>Description</Text>
+                    <Text component={TextVariants.h2}>Description</Text>
                     <Text component={TextVariants.p}>{agentInfo.description}</Text>
                 </TextContent>
                 <TextContent>
-                    <Text component={TextVariants.h3}>System Prompt</Text>
+                    <Text component={TextVariants.h2}>System Prompt</Text>
                     <Text component={TextVariants.p}>{agentInfo.system_prompt}</Text>
                 </TextContent>
                 <TextContent>
-                    <Text component={TextVariants.h3}>Uploaded File(s)</Text>
+                    <Text component={TextVariants.h2}>Uploaded File(s)</Text>
                     { agentInfo.filenames.length === 0 && <Text component={TextVariants.p}>No files uploaded.</Text> }
                 </TextContent>
                 <List>
