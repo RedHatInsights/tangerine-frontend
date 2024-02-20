@@ -10,9 +10,14 @@ import {
   PanelMain,
   PanelMainBody,
   Title,
+  Modal,
+  ModalVariant,
 } from '@patternfly/react-core';
-import { Table, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import { Link } from 'react-router-dom';
+import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import { Link, useNavigate } from 'react-router-dom';
+
+import AddCircleIcon from "@patternfly/react-icons/dist/esm/icons/add-circle-o-icon"
+import ChatIcon from "@patternfly/react-icons/dist/esm/icons/comments-icon"
 
 const Main = () => {
   const [data, setData] = useState('');
@@ -22,6 +27,18 @@ const Main = () => {
     description: '',
     file: null
   });
+
+  const navigate = useNavigate();
+
+  const [isModalOpen, setModalOpen] = React.useState(false);
+  const handleModalToggle = (_event) => {
+    setModalOpen(!isModalOpen);
+  };
+
+  const confirmHandler = () => {
+    addAgent();
+    handleModalToggle();
+  }
 
   useEffect(() => {
     getAgents();
@@ -96,61 +113,73 @@ const Main = () => {
     <Panel>
       <PanelMain>
         <PanelMainBody>
-          <Title headingLevel="h1">Add Agent</Title>
           {loading ? (
               <p>Loading Agents...</p>
           ) : (
-            <div>
-              <Form>
-                <FormGroup>
-                  <FormGroup label="Agent Name" isRequired>
-                    <TextInput id="name" isRequired type="text" name="name" value={agentData.name} onChange={handleChange} />
-                  </FormGroup>
-
-                  <FormGroup label="Agent Description" isRequired>
-                    <TextInput id="description" isRequired type="text" name="description" value={agentData.description} onChange={handleChange} />
-                  </FormGroup>
-
-                  <FormGroup label="System Prompt" isRequired>
-                    <TextInput id="prompt" isRequired type="text" name="system_prompt" value={agentData.system_prompt} onChange={handleChange} />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <Button onClick={addAgent}>Add Agent</Button>
-                  </FormGroup>
-                </FormGroup>
-              </Form>
-
+            <div style={{"width": "95%", "display": "flex", "flex-direction": "column"}}>
+              <div style={{"display": "flex", "justifyContent": "end"}}>
+                <Button variant="primary" onClick={handleModalToggle} icon={<AddCircleIcon/>}>
+                  Add Agent
+                </Button>
+              </div>
               <Title headingLevel="h1">Agents</Title>
               <Table aria-label="Simple table">
               <Thead>
                 <Tr>
-                  <Th>ID</Th>
                   <Th>Name</Th>
                   <Th>Description</Th>
-                  <Th>System Prompt</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {data.map(agent => (
                   <Tr key={agent.id}>
-                    <Td>{agent.id}</Td>
                     <Link to={`/${agent.id}`}><Td>{agent.agent_name}</Td></Link>
                     <Td>{agent.description}</Td>
-                    <Td>{agent.system_prompt}</Td>
                     <Td>
-                      <input
-                        id={agent.id}
-                        type="file"
-                        name="file"
-                        onChange={uploadFile}
-                      />
-                      <Button id={agent.id} onClick={deleteAgent} variant="danger">Delete Agent</Button>
+                      <Button id={agent.id} onClick={() => navigate(`/${agent.id}/chat`)} variant="warning">Chat</Button>
                     </Td>
+                    <Td>
+                      <Button id={agent.id} onClick={() => navigate(`/${agent.id}`)} variant="secondary">Modify</Button>
+                    </Td>
+                    <Td>
+                      <Button id={agent.id} onClick={deleteAgent} variant="danger">Delete</Button>
+                    </Td>
+
                   </Tr>
                 ))}
               </Tbody>
               </Table>
+              <Modal
+                variant={ModalVariant.small}
+                title="Create a new Agent"
+                description="Enter the information below to create a new agent."
+                isOpen={isModalOpen}
+                onClose={handleModalToggle}
+                actions={[
+                  <Button key="addAgent" variant="primary" form="add-agent-button" onClick={confirmHandler}>
+                    Confirm
+                  </Button>,
+                  <Button key="cancel" variant="link" onClick={handleModalToggle}>
+                    Cancel
+                  </Button>
+                ]}
+              >
+                  <Form>
+                    <FormGroup>
+                      <FormGroup label="Agent Name" isRequired>
+                        <TextInput id="name" isRequired type="text" name="name" value={agentData.name} onChange={handleChange}/>
+                      </FormGroup>
+
+                      <FormGroup label="Agent Description" isRequired>
+                        <TextInput id="description" isRequired type="text" name="description" value={agentData.description} onChange={handleChange} />
+                      </FormGroup>
+
+                      <FormGroup label="System Prompt" isRequired>
+                        <TextInput id="prompt" isRequired type="text" name="system_prompt" value={agentData.system_prompt} onChange={handleChange} />
+                      </FormGroup>
+                    </FormGroup>
+                  </Form>
+              </Modal>
             </div>
           )}
         </PanelMainBody>

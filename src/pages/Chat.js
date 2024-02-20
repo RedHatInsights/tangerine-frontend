@@ -97,7 +97,7 @@ function Chat() {
                 {
                     messages && messages.map((message, index) => (
                         <TextContent key={index}>
-                            <Text component={TextVariants.h4}>{message.sender}</Text>
+                            <Text component={TextVariants.h4}>{message.sender === "ai" ? agentInfo.agent_name : message.sender}</Text>
                             <Text component={TextVariants.p}>{message.text}</Text>
                         </TextContent>
                     ))

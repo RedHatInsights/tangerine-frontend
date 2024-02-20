@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@patternfly/react-core": "^5.2.0",
+    "@patternfly/react-icons": "^5.2.0",
     "@patternfly/react-table": "^5.2.0",
     "axios": "^0.24.0",
     "react": "^18.2.0",
