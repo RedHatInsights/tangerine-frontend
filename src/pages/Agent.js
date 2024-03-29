@@ -2,7 +2,7 @@ import axios from "axios"
 
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { TextContent, Text, TextVariants, Button, List, ListItem } from "@patternfly/react-core"
+import { TextContent, Text, TextVariants, Button, List, ListItem, Panel, PanelMain, PanelMainBody } from "@patternfly/react-core"
 import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon"
 
 function Agent() {
@@ -41,10 +41,10 @@ function Agent() {
 
     return(
         <div style={{"marginLeft": "2.5rem"}}>
-            <div style={{"paddingTop": "1rem"}}>
+            <div style={{"paddingTop": "1rem", "paddingBottom": "2rem"}}>
                 <Button variant="secondary" icon={<AngleLeftIcon/>} onClick={() => navigate("/")}>Back</Button>
             </div>
-            <TextContent style={{"paddingTop": "2rem", "paddingBottom": "2rem", "display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "30rem"}}>
+            <TextContent style={{"display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "35rem"}}>
                 <TextContent>
                     <Text component={TextVariants.h2}>Agent Name</Text>
                     <Text component={TextVariants.p}>{agentInfo.agent_name}</Text>
@@ -61,11 +61,17 @@ function Agent() {
                     <Text component={TextVariants.h2}>Uploaded File(s)</Text>
                     { agentInfo.filenames.length === 0 && <Text component={TextVariants.p}>No files uploaded.</Text> }
                 </TextContent>
-                <List>
-                    {
-                        agentInfo.filenames.map(filename => <ListItem key={filename}>{filename}</ListItem>)
-                    }
-                </List>
+                <Panel isScrollable>
+                    <PanelMain tabIndex={0}>
+                        <PanelMainBody>
+                            <List>
+                                {
+                                    agentInfo.filenames.map(filename => <ListItem key={filename}>{filename}</ListItem>)
+                                }
+                            </List>
+                        </PanelMainBody>
+                    </PanelMain>
+                </Panel>
             </TextContent>
             <TextContent>
                     <Text component={TextVariants.p}>Supported file formats: ".md", ".txt" and ".pdf"</Text>
