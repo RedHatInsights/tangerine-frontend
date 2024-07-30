@@ -27,7 +27,7 @@ function Chat() {
       }, []);
 
     const getAgentInfo = () => {
-        axios.get(`/agents/${agentId}`)
+        axios.get(`/api/agents/${agentId}`)
           .then(response => {
             setAgentInfo(response.data)
           })
@@ -38,7 +38,7 @@ function Chat() {
 
     const sendChatMessage = async () => {
         // Make a POST request with streaming response
-        const response = await fetch(`/agents/${agentId}/chat`, {
+        const response = await fetch(`/api/agents/${agentId}/chat`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

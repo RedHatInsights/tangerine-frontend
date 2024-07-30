@@ -17,7 +17,7 @@ function Agent() {
       }, []);
 
     const getAgentInfo = () => {
-        axios.get(`/agents/${agentId}`)
+        axios.get(`/api/agents/${agentId}`)
           .then(response => {
             setAgentInfo(response.data)
           })
@@ -30,7 +30,7 @@ function Agent() {
         const file = agent.target.files[0];
         const formData = new FormData();
         formData.append("file", file);
-        axios.post(`/agents/${agentId}/document_upload`, formData)
+        axios.post(`/api/agents/${agentId}/document_upload`, formData)
           .then(() =>
           getAgentInfo()
         )

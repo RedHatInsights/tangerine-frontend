@@ -52,7 +52,7 @@ const Main = () => {
   }
 
   const getAgents = () => {
-    axios.get('/agents')
+    axios.get('/api/agents')
       .then(response => {
         setData(response.data.data)
          setLoading(false);
@@ -70,7 +70,7 @@ const Main = () => {
     formData.append('system_prompt', system_prompt);
     formData.append('file', file);
 
-    axios.post('/agents', formData)
+    axios.post('/api/agents', formData)
       .then(() => {
         setAgentData({
           name: '',
@@ -86,7 +86,7 @@ const Main = () => {
   }
 
   const deleteAgent = (agent) => {
-    axios.delete('/agents/' + agent.target.id)
+    axios.delete('/api/agents/' + agent.target.id)
       .then(() =>
         getAgents()
       )

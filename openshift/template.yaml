@@ -1,0 +1,82 @@
+---
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: tangerine-frontend
+
+objects:
+# tangerine frontend
+- kind: Deployment
+  apiVersion: apps/v1
+  metadata:
+    name: tangerine-frontend
+  spec:
+    strategy:
+      type: Recreate  # TODO: switch to Rolling
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      activeDeadlineSeconds: 21600
+    replicas: 1
+    selector:
+      matchLabels:
+        app: tangerine-frontend
+    template:
+      metadata:
+        labels:
+          app: tangerine-frontend
+      spec:
+        containers:
+          - resources:
+              requests:
+                memory: 128Mi
+                cpu: 250m
+              limits:
+                memory: 128Mi
+                cpu: 500m
+            readinessProbe:
+              tcpSocket:
+                port: 3000
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              timeoutSeconds: 1
+              successThreshold: 1
+              failureThreshold: 3
+            livenessProbe:
+              tcpSocket:
+                port: 3000
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              timeoutSeconds: 1
+              successThreshold: 1
+              failureThreshold: 3
+            terminationMessagePath: /dev/termination-log
+            name: tangerine-frontend
+            securityContext:
+              capabilities: {}
+              privileged: false
+            ports:
+              - containerPort: 3000
+                protocol: TCP
+            imagePullPolicy: Always  # TODO: change to "IfNotPresent" when project stabilizes
+            terminationMessagePolicy: File
+            image: 'quay.io/tangerine/tangerine-frontend:latest'
+        restartPolicy: Always
+        terminationGracePeriodSeconds: 30
+        dnsPolicy: ClusterFirst
+        securityContext: {}
+        schedulerName: default-scheduler
+
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: tangerine-frontend
+  spec:
+    selector:
+      app: tangerine-frontend
+    ports:
+      - name: tangerine-frontend
+        protocol: TCP
+        port: 3000
+        targetPort: 3000
+
