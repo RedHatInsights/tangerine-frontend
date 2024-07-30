@@ -2,6 +2,9 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import axios from "axios"
 import { TextContent, Text, TextVariants, TextInput } from "@patternfly/react-core"
+import Markdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import SearchInfo from "../components/SearchInfo"
 
 function Chat() {
     const { agentId } = useParams()
@@ -70,8 +73,8 @@ function Chat() {
             })
 
             for (const parsedLine of parsedLines) {
-                const { text_content } = parsedLine;
-                if (text_content) {
+                const { text_content, search_metadata } = parsedLine;
+                if (text_content || search_metadata) {
                     setMessages((prevMessages) => {
                         const lastMessage = prevMessages[prevMessages.length - 1]
                         if (lastMessage.sender !== "ai") {
@@ -79,7 +82,13 @@ function Chat() {
                             return [...prevMessages, newMessage]
                         }
                         const updatedMessages = [...prevMessages];
-                        updatedMessages[updatedMessages.length - 1].text += text_content
+                        if (text_content) {
+                            updatedMessages[updatedMessages.length - 1].text += text_content
+                        }
+                        if (search_metadata) {
+                            updatedMessages[updatedMessages.length - 1].search_metadata = search_metadata
+                        }
+                        
                         return updatedMessages;
                     })
                 }
@@ -103,7 +112,8 @@ function Chat() {
                                     messages && messages.map((message, index) => (
                                         <TextContent key={index} style={{"paddingBottom": "1rem"}}>
                                             <Text component={TextVariants.h3}>{message.sender === "ai" ? agentInfo.agent_name : message.sender}</Text>
-                                            <Text component={TextVariants.p}>{message.text}</Text>
+                                            <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+                                            {message.sender === "ai" && <SearchInfo searchData={message.search_metadata}/>}
                                         </TextContent>
                                     ))
                                 }
