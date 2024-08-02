@@ -1,16 +1,37 @@
 import axios from "axios"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { TextContent, Text, TextVariants, Button, List, ListItem, Panel, PanelMain, PanelMainBody } from "@patternfly/react-core"
+import {
+    TextContent,
+    Text,
+    TextVariants,
+    Button,
+    List,
+    ListItem,
+    Panel,
+    PanelMain,
+    PanelMainBody,
+    Modal,
+    ModalVariant,
+    Form,
+    FormGroup,
+    TextInput,
+} from "@patternfly/react-core"
 import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon"
 
 function Agent() {
     const { agentId } = useParams()
 
     const [agentInfo, setAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: []})
+    const [modalAgentInfo, setModalAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: []})
 
     const navigate = useNavigate()
+
+    const [isModalOpen, setModalOpen] = React.useState(false);
+    const handleModalToggle = (_event) => {
+      setModalOpen(!isModalOpen);
+    };
 
     useEffect(() => {
         getAgentInfo();
@@ -20,11 +41,40 @@ function Agent() {
         axios.get(`/api/agents/${agentId}`)
           .then(response => {
             setAgentInfo(response.data)
+            setModalAgentInfo(response.data)
           })
           .catch(error => {
             console.error('Error fetching agents:', error);
           });
     };
+
+    const updateAgent = () => {
+        const { agent_name, description, system_prompt } = modalAgentInfo;
+        axios.put(`/api/agents/${agentId}`, {
+            "agent_name": agent_name,
+            "description": description,
+            "system_prompt": system_prompt
+        })
+        .then(() => {
+            getAgentInfo();
+        })
+        .catch(error => {
+            console.error('Error updating agent:', error);
+        })
+    }
+
+    const handleChange = (e) => {
+        const { name, value, files } = e.target;
+        setModalAgentInfo({
+            ...modalAgentInfo,
+            [name]: files ? files[0] : value
+          })
+    }
+
+    const confirmHandler = () => {
+        updateAgent();
+        handleModalToggle();
+    }
 
     const uploadFile = (agent) => {
         const file = agent.target.files[0];
@@ -83,10 +133,42 @@ function Agent() {
                     name="file"
                     onChange={uploadFile}
                 />
-                <div>
+                <div style={{"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "width": "25rem"}}>
+                    <Button variant="primary" onClick={handleModalToggle}>Modify Agent Info</Button>
                     <Button variant="warning" onClick={() => navigate(`/${agentId}/chat`)}>Chat With {agentInfo.agent_name}</Button>
                 </div>
             </div>
+            <Modal
+                variant={ModalVariant.small}
+                title="Update Agent"
+                description="Modify the information below to update the agent."
+                isOpen={isModalOpen}
+                onClose={handleModalToggle}
+                actions={[
+                  <Button key="addAgent" variant="primary" form="add-agent-button" onClick={confirmHandler}>
+                    Confirm
+                  </Button>,
+                  <Button key="cancel" variant="link" onClick={handleModalToggle}>
+                    Cancel
+                  </Button>
+                ]}
+              >
+                  <Form>
+                    <FormGroup>
+                      <FormGroup label="Agent Name" isRequired>
+                        <TextInput id="agent_name" isRequired type="text" name="agent_name" value={modalAgentInfo.agent_name} onChange={handleChange}/>
+                      </FormGroup>
+
+                      <FormGroup label="Agent Description" isRequired>
+                        <TextInput id="description" isRequired type="text" name="description" value={modalAgentInfo.description} onChange={handleChange} />
+                      </FormGroup>
+
+                      <FormGroup label="System Prompt" isRequired>
+                        <TextInput id="prompt" isRequired type="text" name="system_prompt" value={modalAgentInfo.system_prompt} onChange={handleChange} />
+                      </FormGroup>
+                    </FormGroup>
+                  </Form>
+              </Modal>
         </div>
     )
 }
