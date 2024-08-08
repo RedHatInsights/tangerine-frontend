@@ -31,7 +31,7 @@ const SearchInfo = ({ searchData }) => {
     "borderRadius": "10px"
   }
 
-  return <ExpandableSection toggleText={isExpanded ? 'Hide search data' : 'Show search data'} onToggle={onToggle} isExpanded={isExpanded}>
+  return searchData.length > 0 && <ExpandableSection toggleText={isExpanded ? 'Hide search data' : 'Show search data'} onToggle={onToggle} isExpanded={isExpanded}>
         The following files were shown to the LLM.
         {
             searchData.map((content, index) => {
