@@ -4,7 +4,7 @@ import {
   Button,
   Form,
   FormGroup,
-  FileUpload,
+  TextArea,
   TextInput,
   Panel,
   PanelMain,
@@ -21,9 +21,11 @@ import AddCircleIcon from "@patternfly/react-icons/dist/esm/icons/add-circle-o-i
 const Main = () => {
   const [data, setData] = useState('');
   const [loading, setLoading] = useState(true);
+  const [defaultsLoading, setDefaultsLoading] = useState(true);
   const [agentData, setAgentData] = useState({
     name: '',
     description: '',
+    system_prompt: '',
     file: null
   });
 
@@ -31,7 +33,26 @@ const Main = () => {
 
   const [isModalOpen, setModalOpen] = React.useState(false);
   const handleModalToggle = (_event) => {
-    setModalOpen(!isModalOpen);
+    if (!isModalOpen) {
+      setModalOpen(true)
+      setDefaultsLoading(true);
+      axios.get('/api/agentDefaults')
+        .then(response => {
+          setAgentData({
+            name: '',
+            description: '',
+            system_prompt: response.data.system_prompt,
+            file: null
+          });
+          setDefaultsLoading(false);
+        })
+        .catch(error => {
+          console.error('Error fetching agent defaults:', error);
+        });
+      }
+    else {
+      setModalOpen(false);
+    }
   };
 
   const confirmHandler = () => {
@@ -55,7 +76,7 @@ const Main = () => {
     axios.get('/api/agents')
       .then(response => {
         setData(response.data.data)
-         setLoading(false);
+        setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching agents:', error);
@@ -64,6 +85,7 @@ const Main = () => {
 
   const addAgent = () => {
     const { name, description, system_prompt, file } = agentData;
+
     const formData = new FormData();
     formData.append('name', name);
     formData.append('description', description);
@@ -138,11 +160,12 @@ const Main = () => {
               </Table>
               </div>
               <Modal
-                variant={ModalVariant.small}
+                variant={ModalVariant.medium}
                 title="Create a new Agent"
                 description="Enter the information below to create a new agent."
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
+                footer={defaultsLoading ? (<p>Loading agent defaults...</p>) : null}
                 actions={[
                   <Button key="addAgent" variant="primary" form="add-agent-button" onClick={confirmHandler}>
                     Confirm
@@ -163,7 +186,7 @@ const Main = () => {
                       </FormGroup>
 
                       <FormGroup label="System Prompt" isRequired>
-                        <TextInput id="prompt" isRequired type="text" name="system_prompt" value={agentData.system_prompt} onChange={handleChange} />
+                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={agentData.system_prompt} onChange={handleChange} />
                       </FormGroup>
                     </FormGroup>
                   </Form>
