@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import {
     TextContent,
     Text,
+    TextArea,
     TextVariants,
     Button,
     List,
@@ -164,7 +165,7 @@ function Agent() {
                       </FormGroup>
 
                       <FormGroup label="System Prompt" isRequired>
-                        <TextInput id="prompt" isRequired type="text" name="system_prompt" value={modalAgentInfo.system_prompt} onChange={handleChange} />
+                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalAgentInfo.system_prompt} onChange={handleChange} />
                       </FormGroup>
                     </FormGroup>
                   </Form>
