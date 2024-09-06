@@ -81,7 +81,7 @@ function Agent() {
         const file = agent.target.files[0];
         const formData = new FormData();
         formData.append("file", file);
-        axios.post(`/api/agents/${agentId}/document_upload`, formData)
+        axios.post(`/api/agents/${agentId}/documents`, formData)
           .then(() =>
           getAgentInfo()
         )
