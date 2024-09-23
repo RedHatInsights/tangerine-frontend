@@ -4,6 +4,20 @@ apiVersion: template.openshift.io/v1
 metadata:
   name: tangerine-frontend
 
+parameters:
+- name: IMAGE
+  value: quay.io/tangerine/tangerine-frontend:latest
+- name: IMAGE_TAG
+  value: latest
+- name: CPU_LIMIT
+  value: 500m
+- name: MEMORY_LIMIT
+  value: 128Mi
+- name: CPU_REQUEST
+  value: 250m
+- name: MEMORY_REQUEST
+  value: 128Mi
+
 objects:
 # tangerine frontend
 - kind: Deployment
@@ -29,11 +43,11 @@ objects:
         containers:
           - resources:
               requests:
-                memory: 128Mi
-                cpu: 250m
+                memory: ${MEMORY_REQUEST}
+                cpu: ${CPU_REQUEST}
               limits:
-                memory: 128Mi
-                cpu: 500m
+                memory: ${MEMORY_LIMIT}
+                cpu: ${CPU_LIMIT}
             readinessProbe:
               tcpSocket:
                 port: 3000
@@ -58,9 +72,9 @@ objects:
             ports:
               - containerPort: 3000
                 protocol: TCP
-            imagePullPolicy: Always  # TODO: change to "IfNotPresent" when project stabilizes
+            imagePullPolicy: IfNotPresent
             terminationMessagePolicy: File
-            image: 'quay.io/tangerine/tangerine-frontend:latest'
+            image: ${IMAGE}:${IMAGE_TAG}
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         dnsPolicy: ClusterFirst
