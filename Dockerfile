@@ -10,6 +10,7 @@ RUN fix-permissions ./
 USER 1001
 
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
 ENV PORT=3000
 
 # Install the dependencies
