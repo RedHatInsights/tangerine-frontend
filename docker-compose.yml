@@ -1,0 +1,44 @@
+services:
+  tangerine-frontend:
+    container_name: tangerine-frontend
+    networks:
+      - tangerine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    healthcheck:
+      test: curl --fail "http://localhost:3000/" || exit 1
+      start_period: 10s
+      start_interval: 1s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    container_name: tangerine-caddy
+    networks:
+      - tangerine
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_SERVICE=tangerine-backend
+      - BACKEND_PORT=8000
+      - FRONTEND_SERVICE=tangerine-frontend
+      - FRONTEND_PORT=3000
+    healthcheck:
+      test: curl --fail "http://localhost:8000/" || exit 1
+      start_period: 10s
+      start_interval: 1s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      tangerine-frontend:
+        condition: service_healthy
+
+networks:
+  tangerine:
+    external: true
