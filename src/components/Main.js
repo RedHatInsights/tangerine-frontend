@@ -84,15 +84,7 @@ const Main = () => {
   };
 
   const addAgent = () => {
-    const { name, description, system_prompt, file } = agentData;
-
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('description', description);
-    formData.append('system_prompt', system_prompt);
-    formData.append('file', file);
-
-    axios.post('/api/agents', formData)
+    axios.post('/api/agents', agentData)
       .then(() => {
         setAgentData({
           name: '',
