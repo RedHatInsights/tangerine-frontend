@@ -9,6 +9,8 @@ tangerine is a slim and light-weight RAG (Retieval Augmented Generated) system u
 
 Each agent is intended to answer questions related to a set of documents known as a knowledge base (KB).
 
+![Demo video](docs/demo.gif)
+
 ## Overview
 
 See the [tangerine-backend overview](https://github.com/RedHatInsights/tangerine-backend#overview) for an introduction.
