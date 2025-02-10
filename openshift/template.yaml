@@ -34,11 +34,11 @@ objects:
     replicas: 1
     selector:
       matchLabels:
-        app: tangerine-frontend
+        app.kubernetes.io/name: tangerine-frontend
     template:
       metadata:
         labels:
-          app: tangerine-frontend
+          app.kubernetes.io/name: tangerine-frontend
       spec:
         containers:
           - resources:
@@ -87,7 +87,7 @@ objects:
     name: tangerine-frontend
   spec:
     selector:
-      app: tangerine-frontend
+      app.kubernetes.io/name: tangerine-frontend
     ports:
       - name: tangerine-frontend
         protocol: TCP
