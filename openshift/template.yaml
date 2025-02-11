@@ -85,6 +85,8 @@ objects:
   apiVersion: v1
   metadata:
     name: tangerine-frontend
+    labels:
+      app.kubernetes.io/name: tangerine-frontend
   spec:
     selector:
       app.kubernetes.io/name: tangerine-frontend
