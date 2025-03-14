@@ -21,7 +21,7 @@ import {
 } from "@patternfly/react-core"
 import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon"
 
-function assistant() {
+function Assistant() {
     const { assistantId } = useParams()
 
     const [assistantInfo, setassistantInfo] = useState({id: '', assistant_name: '', description: '', system_prompt: '', filenames: []})
@@ -174,4 +174,4 @@ function assistant() {
     )
 }
 
-export default assistant
+export default Assistant
