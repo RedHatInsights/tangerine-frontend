@@ -97,7 +97,7 @@ function Assistant() {
             </div>
             <TextContent style={{"display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "35rem"}}>
                 <TextContent>
-                    <Text component={TextVariants.h2}>assistant Name</Text>
+                    <Text component={TextVariants.h2}>Assistant Name</Text>
                     <Text component={TextVariants.p}>{assistantInfo.assistant_name}</Text>
                 </TextContent>
                 <TextContent>
@@ -156,11 +156,11 @@ function Assistant() {
               >
                   <Form>
                     <FormGroup>
-                      <FormGroup label="assistant Name" isRequired>
+                      <FormGroup label="Assistant Name" isRequired>
                         <TextInput id="assistant_name" isRequired type="text" name="assistant_name" value={modalassistantInfo.assistant_name} onChange={handleChange}/>
                       </FormGroup>
 
-                      <FormGroup label="assistant Description" isRequired>
+                      <FormGroup label="Assistant Description" isRequired>
                         <TextInput id="description" isRequired type="text" name="description" value={modalassistantInfo.description} onChange={handleChange} />
                       </FormGroup>
 

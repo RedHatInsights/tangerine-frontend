@@ -169,11 +169,11 @@ const Main = () => {
               >
                   <Form>
                     <FormGroup>
-                      <FormGroup label="assistant Name" isRequired>
+                      <FormGroup label="Assistant Name" isRequired>
                         <TextInput id="name" isRequired type="text" name="name" value={assistantData.name} onChange={handleChange}/>
                       </FormGroup>
 
-                      <FormGroup label="assistant Description" isRequired>
+                      <FormGroup label="Assistant Description" isRequired>
                         <TextInput id="description" isRequired type="text" name="description" value={assistantData.description} onChange={handleChange} />
                       </FormGroup>
 
