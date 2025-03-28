@@ -24,8 +24,8 @@ import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-ico
 function Assistant() {
     const { assistantId } = useParams()
 
-    const [assistantInfo, setassistantInfo] = useState({id: '', assistant_name: '', description: '', system_prompt: '', filenames: []})
-    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', assistant_name: '', description: '', system_prompt: '', filenames: []})
+    const [assistantInfo, setassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: []})
+    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: []})
 
     const navigate = useNavigate()
 
@@ -50,9 +50,9 @@ function Assistant() {
     };
 
     const updateassistant = () => {
-        const { assistant_name, description, system_prompt } = modalassistantInfo;
+        const { name, description, system_prompt } = modalassistantInfo;
         axios.put(`/api/assistants/${assistantId}`, {
-            "assistant_name": assistant_name,
+            "name": name,
             "description": description,
             "system_prompt": system_prompt
         })
@@ -98,7 +98,7 @@ function Assistant() {
             <TextContent style={{"display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "35rem"}}>
                 <TextContent>
                     <Text component={TextVariants.h2}>Assistant Name</Text>
-                    <Text component={TextVariants.p}>{assistantInfo.assistant_name}</Text>
+                    <Text component={TextVariants.p}>{assistantInfo.name}</Text>
                 </TextContent>
                 <TextContent>
                     <Text component={TextVariants.h2}>Description</Text>
@@ -136,7 +136,7 @@ function Assistant() {
                 />
                 <div style={{"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "width": "25rem"}}>
                     <Button variant="primary" onClick={handleModalToggle}>Modify assistant Info</Button>
-                    <Button variant="warning" onClick={() => navigate(`/${assistantId}/chat`)}>Chat With {assistantInfo.assistant_name}</Button>
+                    <Button variant="warning" onClick={() => navigate(`/${assistantId}/chat`)}>Chat With {assistantInfo.name}</Button>
                 </div>
             </div>
             <Modal
@@ -157,7 +157,7 @@ function Assistant() {
                   <Form>
                     <FormGroup>
                       <FormGroup label="Assistant Name" isRequired>
-                        <TextInput id="assistant_name" isRequired type="text" name="assistant_name" value={modalassistantInfo.assistant_name} onChange={handleChange}/>
+                        <TextInput id="name" isRequired type="text" name="name" value={modalassistantInfo.name} onChange={handleChange}/>
                       </FormGroup>
 
                       <FormGroup label="Assistant Description" isRequired>

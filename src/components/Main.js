@@ -134,7 +134,7 @@ const Main = () => {
               <Tbody>
                 {data.map(assistant => (
                   <Tr key={assistant.id}>
-                    <Td><Link to={`/${assistant.id}`}>{assistant.assistant_name}</Link></Td>
+                    <Td><Link to={`/${assistant.id}`}>{assistant.name}</Link></Td>
                     <Td>{assistant.description}</Td>
                     <Td>
                       <Button id={assistant.id} onClick={() => navigate(`/${assistant.id}/chat`)} variant="warning">Chat</Button>

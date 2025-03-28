@@ -16,7 +16,7 @@ import React from "react";
 function Chat() {
   const { assistantId } = useParams();
   const [assistantInfo, setassistantInfo] = useState({
-    assistant_name: "",
+    name: "",
     description: "",
   });
   const [messages, setMessages] = useState([]);
@@ -164,7 +164,7 @@ function Chat() {
         }}
       >
         <Text component={TextVariants.h1}>
-          Chat with {assistantInfo.assistant_name}
+          Chat with {assistantInfo.name}
         </Text>
         <Text component={TextVariants.p}>{assistantInfo.description}</Text>
         <Text component={TextVariants.p}>Session ID: {sessionId}</Text>
@@ -187,7 +187,7 @@ function Chat() {
                   <TextContent key={index} style={{ paddingBottom: "1rem" }}>
                     <Text component={TextVariants.h3}>
                       {message.sender === "ai"
-                        ? assistantInfo.assistant_name
+                        ? assistantInfo.name
                         : message.sender}
                     </Text>
                     <Text component={TextVariants.small}>
