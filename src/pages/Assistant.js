@@ -21,11 +21,11 @@ import {
 } from "@patternfly/react-core"
 import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon"
 
-function Agent() {
-    const { agentId } = useParams()
+function Assistant() {
+    const { assistantId } = useParams()
 
-    const [agentInfo, setAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: []})
-    const [modalAgentInfo, setModalAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: []})
+    const [assistantInfo, setassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: []})
+    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: []})
 
     const navigate = useNavigate()
 
@@ -35,55 +35,55 @@ function Agent() {
     };
 
     useEffect(() => {
-        getAgentInfo();
+        getassistantInfo();
       }, []);
 
-    const getAgentInfo = () => {
-        axios.get(`/api/agents/${agentId}`)
+    const getassistantInfo = () => {
+        axios.get(`/api/assistants/${assistantId}`)
           .then(response => {
-            setAgentInfo(response.data)
-            setModalAgentInfo(response.data)
+            setassistantInfo(response.data)
+            setModalassistantInfo(response.data)
           })
           .catch(error => {
-            console.error('Error fetching agents:', error);
+            console.error('Error fetching assistants:', error);
           });
     };
 
-    const updateAgent = () => {
-        const { agent_name, description, system_prompt } = modalAgentInfo;
-        axios.put(`/api/agents/${agentId}`, {
-            "agent_name": agent_name,
+    const updateassistant = () => {
+        const { name, description, system_prompt } = modalassistantInfo;
+        axios.put(`/api/assistants/${assistantId}`, {
+            "name": name,
             "description": description,
             "system_prompt": system_prompt
         })
         .then(() => {
-            getAgentInfo();
+            getassistantInfo();
         })
         .catch(error => {
-            console.error('Error updating agent:', error);
+            console.error('Error updating assistant:', error);
         })
     }
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
-        setModalAgentInfo({
-            ...modalAgentInfo,
+        setModalassistantInfo({
+            ...modalassistantInfo,
             [name]: files ? files[0] : value
           })
     }
 
     const confirmHandler = () => {
-        updateAgent();
+        updateassistant();
         handleModalToggle();
     }
 
-    const uploadFile = (agent) => {
-        const file = agent.target.files[0];
+    const uploadFile = (assistant) => {
+        const file = assistant.target.files[0];
         const formData = new FormData();
         formData.append("file", file);
-        axios.post(`/api/agents/${agentId}/documents`, formData)
+        axios.post(`/api/assistants/${assistantId}/documents`, formData)
           .then(() =>
-          getAgentInfo()
+          getassistantInfo()
         )
           .catch(error => {
             console.error('Error uploading file:', error);
@@ -97,27 +97,27 @@ function Agent() {
             </div>
             <TextContent style={{"display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "35rem"}}>
                 <TextContent>
-                    <Text component={TextVariants.h2}>Agent Name</Text>
-                    <Text component={TextVariants.p}>{agentInfo.agent_name}</Text>
+                    <Text component={TextVariants.h2}>Assistant Name</Text>
+                    <Text component={TextVariants.p}>{assistantInfo.name}</Text>
                 </TextContent>
                 <TextContent>
                     <Text component={TextVariants.h2}>Description</Text>
-                    <Text component={TextVariants.p}>{agentInfo.description}</Text>
+                    <Text component={TextVariants.p}>{assistantInfo.description}</Text>
                 </TextContent>
                 <TextContent>
                     <Text component={TextVariants.h2}>System Prompt</Text>
-                    <Text component={TextVariants.p}>{agentInfo.system_prompt}</Text>
+                    <Text component={TextVariants.p}>{assistantInfo.system_prompt}</Text>
                 </TextContent>
                 <TextContent>
                     <Text component={TextVariants.h2}>Uploaded File(s)</Text>
-                    { agentInfo.filenames.length === 0 && <Text component={TextVariants.p}>No files uploaded.</Text> }
+                    { assistantInfo.filenames.length === 0 && <Text component={TextVariants.p}>No files uploaded.</Text> }
                 </TextContent>
                 <Panel isScrollable>
                     <PanelMain tabIndex={0}>
                         <PanelMainBody>
                             <List>
                                 {
-                                    agentInfo.filenames.map(filename => <ListItem key={filename}>{filename}</ListItem>)
+                                    assistantInfo.filenames.map(filename => <ListItem key={filename}>{filename}</ListItem>)
                                 }
                             </List>
                         </PanelMainBody>
@@ -129,24 +129,24 @@ function Agent() {
                 </TextContent>
             <div style={{"display": "flex", "flexDirection": "column", "height": "7rem", "justifyContent": "space-around"}}>
                 <input
-                    id={agentId}
+                    id={assistantId}
                     type="file"
                     name="file"
                     onChange={uploadFile}
                 />
                 <div style={{"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "width": "25rem"}}>
-                    <Button variant="primary" onClick={handleModalToggle}>Modify Agent Info</Button>
-                    <Button variant="warning" onClick={() => navigate(`/${agentId}/chat`)}>Chat With {agentInfo.agent_name}</Button>
+                    <Button variant="primary" onClick={handleModalToggle}>Modify assistant Info</Button>
+                    <Button variant="warning" onClick={() => navigate(`/${assistantId}/chat`)}>Chat With {assistantInfo.name}</Button>
                 </div>
             </div>
             <Modal
                 variant={ModalVariant.small}
-                title="Update Agent"
-                description="Modify the information below to update the agent."
+                title="Update assistant"
+                description="Modify the information below to update the assistant."
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
                 actions={[
-                  <Button key="addAgent" variant="primary" form="add-agent-button" onClick={confirmHandler}>
+                  <Button key="addassistant" variant="primary" form="add-assistant-button" onClick={confirmHandler}>
                     Confirm
                   </Button>,
                   <Button key="cancel" variant="link" onClick={handleModalToggle}>
@@ -156,16 +156,16 @@ function Agent() {
               >
                   <Form>
                     <FormGroup>
-                      <FormGroup label="Agent Name" isRequired>
-                        <TextInput id="agent_name" isRequired type="text" name="agent_name" value={modalAgentInfo.agent_name} onChange={handleChange}/>
+                      <FormGroup label="Assistant Name" isRequired>
+                        <TextInput id="name" isRequired type="text" name="name" value={modalassistantInfo.name} onChange={handleChange}/>
                       </FormGroup>
 
-                      <FormGroup label="Agent Description" isRequired>
-                        <TextInput id="description" isRequired type="text" name="description" value={modalAgentInfo.description} onChange={handleChange} />
+                      <FormGroup label="Assistant Description" isRequired>
+                        <TextInput id="description" isRequired type="text" name="description" value={modalassistantInfo.description} onChange={handleChange} />
                       </FormGroup>
 
                       <FormGroup label="System Prompt" isRequired>
-                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalAgentInfo.system_prompt} onChange={handleChange} />
+                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalassistantInfo.system_prompt} onChange={handleChange} />
                       </FormGroup>
                     </FormGroup>
                   </Form>
@@ -174,4 +174,4 @@ function Agent() {
     )
 }
 
-export default Agent
+export default Assistant

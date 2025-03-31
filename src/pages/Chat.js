@@ -14,9 +14,9 @@ import { Button } from "@patternfly/react-core";
 import React from "react";
 
 function Chat() {
-  const { agentId } = useParams();
-  const [agentInfo, setAgentInfo] = useState({
-    agent_name: "",
+  const { assistantId } = useParams();
+  const [assistantInfo, setassistantInfo] = useState({
+    name: "",
     description: "",
   });
   const [messages, setMessages] = useState([]);
@@ -46,7 +46,7 @@ function Chat() {
   };
 
   useEffect(() => {
-    getAgentInfo();
+    getassistantInfo();
   }, []);
 
   const vote = (message, upvote, downvote) => {
@@ -71,14 +71,14 @@ function Chat() {
     };
   };
 
-  const getAgentInfo = () => {
+  const getassistantInfo = () => {
     axios
-      .get(`/api/agents/${agentId}`)
+      .get(`/api/assistants/${assistantId}`)
       .then((response) => {
-        setAgentInfo(response.data);
+        setassistantInfo(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching agents:", error);
+        console.error("Error fetching assistants:", error);
       });
   };
 
@@ -88,7 +88,7 @@ function Chat() {
 
   const sendChatMessage = async () => {
     // Make a POST request with streaming response
-    const response = await fetch(`/api/agents/${agentId}/chat`, {
+    const response = await fetch(`/api/assistants/${assistantId}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -164,9 +164,9 @@ function Chat() {
         }}
       >
         <Text component={TextVariants.h1}>
-          Chat with {agentInfo.agent_name}
+          Chat with {assistantInfo.name}
         </Text>
-        <Text component={TextVariants.p}>{agentInfo.description}</Text>
+        <Text component={TextVariants.p}>{assistantInfo.description}</Text>
         <Text component={TextVariants.p}>Session ID: {sessionId}</Text>
       </TextContent>
       <div>
@@ -187,7 +187,7 @@ function Chat() {
                   <TextContent key={index} style={{ paddingBottom: "1rem" }}>
                     <Text component={TextVariants.h3}>
                       {message.sender === "ai"
-                        ? agentInfo.agent_name
+                        ? assistantInfo.name
                         : message.sender}
                     </Text>
                     <Text component={TextVariants.small}>
@@ -239,11 +239,11 @@ function Chat() {
             <TextInput
               type="text"
               value={chatInput}
-              id="agent-chat-input"
-              name="agent-chat-input"
+              id="assistant-chat-input"
+              name="assistant-chat-input"
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={handleChatKeyDown}
-              placeholder="Write a message to the agent. Press ENTER to send..."
+              placeholder="Write a message to the assistant. Press ENTER to send..."
             />
           </div>
         </div>

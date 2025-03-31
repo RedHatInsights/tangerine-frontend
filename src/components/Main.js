@@ -22,7 +22,7 @@ const Main = () => {
   const [data, setData] = useState('');
   const [loading, setLoading] = useState(true);
   const [defaultsLoading, setDefaultsLoading] = useState(true);
-  const [agentData, setAgentData] = useState({
+  const [assistantData, setassistantData] = useState({
     name: '',
     description: '',
     system_prompt: '',
@@ -36,9 +36,9 @@ const Main = () => {
     if (!isModalOpen) {
       setModalOpen(true)
       setDefaultsLoading(true);
-      axios.get('/api/agentDefaults')
+      axios.get('/api/assistantDefaults')
         .then(response => {
-          setAgentData({
+          setassistantData({
             name: '',
             description: '',
             system_prompt: response.data.system_prompt,
@@ -47,7 +47,7 @@ const Main = () => {
           setDefaultsLoading(false);
         })
         .catch(error => {
-          console.error('Error fetching agent defaults:', error);
+          console.error('Error fetching assistant defaults:', error);
         });
       }
     else {
@@ -56,56 +56,56 @@ const Main = () => {
   };
 
   const confirmHandler = () => {
-    addAgent();
+    addassistant();
     handleModalToggle();
   }
 
   useEffect(() => {
-    getAgents();
+    getassistants();
   }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setAgentData({
-      ...agentData,
+    setassistantData({
+      ...assistantData,
       [name]: files ? files[0] : value
     })
   }
 
-  const getAgents = () => {
-    axios.get('/api/agents')
+  const getassistants = () => {
+    axios.get('/api/assistants')
       .then(response => {
         setData(response.data.data)
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching agents:', error);
+        console.error('Error fetching assistants:', error);
       });
   };
 
-  const addAgent = () => {
-    axios.post('/api/agents', agentData)
+  const addassistant = () => {
+    axios.post('/api/assistants', assistantData)
       .then(() => {
-        setAgentData({
+        setassistantData({
           name: '',
           description: '',
           system_prompt: '',
           file: null
         });
-        getAgents();
+        getassistants();
       })
       .catch(error => {
-        console.error('Error adding agent:', error);
+        console.error('Error adding assistant:', error);
       })
   }
 
-  const deleteAgent = (agent) => {
-    axios.delete('/api/agents/' + agent.target.id)
+  const deleteassistant = (assistant) => {
+    axios.delete('/api/assistants/' + assistant.target.id)
       .then(() =>
-        getAgents()
+        getassistants()
       )
       .catch(error => {
-        console.error('Error deleting agent:', error);
+        console.error('Error deleting assistant:', error);
       })
   }
 
@@ -114,16 +114,16 @@ const Main = () => {
       <PanelMain>
         <PanelMainBody>
           {loading ? (
-              <p>Loading Agents...</p>
+              <p>Loading assistants...</p>
           ) : (
             <div style={{"width": "90%", "display": "flex", "flexDirection": "column", "marginLeft": "2.5rem"}}>
               <div style={{"display": "flex", "justifyContent": "end", "paddingTop": "0.5rem"}}>
                 <Button variant="primary" onClick={handleModalToggle} icon={<AddCircleIcon/>}>
-                  Add Agent
+                  Add assistant
                 </Button>
               </div>
               <div style={{"marginTop": "2.5rem"}}>
-              <Title headingLevel="h1" style={{"paddingBottom": "1.5rem"}}>Available Agents</Title>
+              <Title headingLevel="h1" style={{"paddingBottom": "1.5rem"}}>Available assistants</Title>
               <Table aria-label="Simple table">
               <Thead>
                 <Tr>
@@ -132,18 +132,18 @@ const Main = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {data.map(agent => (
-                  <Tr key={agent.id}>
-                    <Td><Link to={`/${agent.id}`}>{agent.agent_name}</Link></Td>
-                    <Td>{agent.description}</Td>
+                {data.map(assistant => (
+                  <Tr key={assistant.id}>
+                    <Td><Link to={`/${assistant.id}`}>{assistant.name}</Link></Td>
+                    <Td>{assistant.description}</Td>
                     <Td>
-                      <Button id={agent.id} onClick={() => navigate(`/${agent.id}/chat`)} variant="warning">Chat</Button>
+                      <Button id={assistant.id} onClick={() => navigate(`/${assistant.id}/chat`)} variant="warning">Chat</Button>
                     </Td>
                     <Td>
-                      <Button id={agent.id} onClick={() => navigate(`/${agent.id}`)} variant="secondary">Modify</Button>
+                      <Button id={assistant.id} onClick={() => navigate(`/${assistant.id}`)} variant="secondary">Modify</Button>
                     </Td>
                     <Td>
-                      <Button id={agent.id} onClick={deleteAgent} variant="danger">Delete</Button>
+                      <Button id={assistant.id} onClick={deleteassistant} variant="danger">Delete</Button>
                     </Td>
 
                   </Tr>
@@ -153,13 +153,13 @@ const Main = () => {
               </div>
               <Modal
                 variant={ModalVariant.medium}
-                title="Create a new Agent"
-                description="Enter the information below to create a new agent."
+                title="Create a new assistant"
+                description="Enter the information below to create a new assistant."
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                footer={defaultsLoading ? (<p>Loading agent defaults...</p>) : null}
+                footer={defaultsLoading ? (<p>Loading assistant defaults...</p>) : null}
                 actions={[
-                  <Button key="addAgent" variant="primary" form="add-agent-button" onClick={confirmHandler}>
+                  <Button key="addassistant" variant="primary" form="add-assistant-button" onClick={confirmHandler}>
                     Confirm
                   </Button>,
                   <Button key="cancel" variant="link" onClick={handleModalToggle}>
@@ -169,16 +169,16 @@ const Main = () => {
               >
                   <Form>
                     <FormGroup>
-                      <FormGroup label="Agent Name" isRequired>
-                        <TextInput id="name" isRequired type="text" name="name" value={agentData.name} onChange={handleChange}/>
+                      <FormGroup label="Assistant Name" isRequired>
+                        <TextInput id="name" isRequired type="text" name="name" value={assistantData.name} onChange={handleChange}/>
                       </FormGroup>
 
-                      <FormGroup label="Agent Description" isRequired>
-                        <TextInput id="description" isRequired type="text" name="description" value={agentData.description} onChange={handleChange} />
+                      <FormGroup label="Assistant Description" isRequired>
+                        <TextInput id="description" isRequired type="text" name="description" value={assistantData.description} onChange={handleChange} />
                       </FormGroup>
 
                       <FormGroup label="System Prompt" isRequired>
-                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={agentData.system_prompt} onChange={handleChange} />
+                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={assistantData.system_prompt} onChange={handleChange} />
                       </FormGroup>
                     </FormGroup>
                   </Form>

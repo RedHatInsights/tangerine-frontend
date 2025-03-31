@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom"
 import Home from "./pages/Home"
-import Agent from "./pages/Agent"
+import Assistant from "./pages/Assistant"
 import Chat from "./pages/Chat"
 import Header from "./components/Header"
 
@@ -11,8 +11,8 @@ function App() {
             <Header/>
             <Routes>
                 <Route path="/" element={ <Home/> } />
-                <Route path="/:agentId" element={ <Agent/> }/>
-                <Route path="/:agentId/chat" element={ <Chat/> } />
+                <Route path="/:assistantId" element={ <Assistant/> }/>
+                <Route path="/:assistantId/chat" element={ <Chat/> } />
             </Routes>
         </>
     )
