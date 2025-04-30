@@ -487,8 +487,8 @@ spec:
         value: $(tasks.build-image-index.results.IMAGE_URL)
       - name: ADDITIONAL_TAGS
         value:
-          - $(tasks.clone-repository.results.short-commit)
-          - "latest"
+        - $(tasks.clone-repository.results.short-commit)
+        - latest
       runAfter:
       - build-image-index
       taskRef:
@@ -530,7 +530,8 @@ spec:
       optional: true
     - name: netrc
       optional: true
-  taskRunTemplate: {}
+  taskRunTemplate:
+    serviceAccountName: build-pipeline-tangerine-frontend
   workspaces:
   - name: workspace
     volumeClaimTemplate:
