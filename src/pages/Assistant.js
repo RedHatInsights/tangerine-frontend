@@ -24,8 +24,8 @@ import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-ico
 function Assistant() {
     const { assistantId } = useParams()
 
-    const [assistantInfo, setassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: []})
-    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: []})
+    const [assistantInfo, setassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: [], model: ''})
+    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: [], model: ''})
 
     const navigate = useNavigate()
 
@@ -50,11 +50,12 @@ function Assistant() {
     };
 
     const updateassistant = () => {
-        const { name, description, system_prompt } = modalassistantInfo;
+        const { name, description, system_prompt, model } = modalassistantInfo;
         axios.put(`/api/assistants/${assistantId}`, {
             "name": name,
             "description": description,
-            "system_prompt": system_prompt
+            "system_prompt": system_prompt,
+            "model": model
         })
         .then(() => {
             getassistantInfo();
@@ -65,10 +66,11 @@ function Assistant() {
     }
 
     const handleChange = (e) => {
-        const { name, value, files } = e.target;
+        const { name, value, files, model } = e.target;
         setModalassistantInfo({
             ...modalassistantInfo,
-            [name]: files ? files[0] : value
+            [name]: files ? files[0] : value,
+            model
           })
     }
 
@@ -162,6 +164,10 @@ function Assistant() {
 
                       <FormGroup label="Assistant Description" isRequired>
                         <TextInput id="description" isRequired type="text" name="description" value={modalassistantInfo.description} onChange={handleChange} />
+                      </FormGroup>
+
+                      <FormGroup label="Model" isRequired>
+                        <TextInput id="model" isRequired type="text" name="model" value={modalassistantInfo.model} onChange={handleChange} />
                       </FormGroup>
 
                       <FormGroup label="System Prompt" isRequired>
