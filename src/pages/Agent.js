@@ -24,8 +24,8 @@ import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-ico
 function Agent() {
     const { agentId } = useParams()
 
-    const [agentInfo, setAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: []})
-    const [modalAgentInfo, setModalAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: []})
+    const [agentInfo, setAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: [], model: ''})
+    const [modalAgentInfo, setModalAgentInfo] = useState({id: '', agent_name: '', description: '', system_prompt: '', filenames: [], model: ''})
 
     const navigate = useNavigate()
 
@@ -50,11 +50,12 @@ function Agent() {
     };
 
     const updateAgent = () => {
-        const { agent_name, description, system_prompt } = modalAgentInfo;
+        const { agent_name, description, system_prompt, model } = modalAgentInfo;
         axios.put(`/api/agents/${agentId}`, {
             "agent_name": agent_name,
             "description": description,
-            "system_prompt": system_prompt
+            "system_prompt": system_prompt,
+            "model": model
         })
         .then(() => {
             getAgentInfo();
@@ -65,10 +66,11 @@ function Agent() {
     }
 
     const handleChange = (e) => {
-        const { name, value, files } = e.target;
+        const { name, value, files, model } = e.target;
         setModalAgentInfo({
             ...modalAgentInfo,
-            [name]: files ? files[0] : value
+            [name]: files ? files[0] : value, 
+            model
           })
     }
 
@@ -163,7 +165,9 @@ function Agent() {
                       <FormGroup label="Agent Description" isRequired>
                         <TextInput id="description" isRequired type="text" name="description" value={modalAgentInfo.description} onChange={handleChange} />
                       </FormGroup>
-
+                      <FormGroup label="Model" isRequired>
+                        <TextInput id="model" isRequired type="text" name="description" value={modalAgentInfo.model} onChange={handleChange} />
+                      </FormGroup>
                       <FormGroup label="System Prompt" isRequired>
                         <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalAgentInfo.system_prompt} onChange={handleChange} />
                       </FormGroup>
