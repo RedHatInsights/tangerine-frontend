@@ -24,13 +24,17 @@ import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-ico
 function Assistant() {
     const { assistantId } = useParams()
 
-    const [assistantInfo, setassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: [], model: ''})
-    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', filenames: [], model: ''})
+    const [assistantInfo, setassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', model: '', filenames: []})
+    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', model: '', filenames: []})
 
     const navigate = useNavigate()
 
     const [isModalOpen, setModalOpen] = React.useState(false);
     const handleModalToggle = (_event) => {
+      if (!isModalOpen) {
+        // Reset modal state to current assistant info when opening
+        setModalassistantInfo({...assistantInfo});
+      }
       setModalOpen(!isModalOpen);
     };
 
@@ -66,12 +70,11 @@ function Assistant() {
     }
 
     const handleChange = (e) => {
-        const { name, value, files, model } = e.target;
+        const { name, value, files } = e.target;
         setModalassistantInfo({
             ...modalassistantInfo,
-            [name]: files ? files[0] : value,
-            model
-          })
+            [name]: files ? files[0] : value          
+        })
     }
 
     const confirmHandler = () => {
@@ -105,6 +108,10 @@ function Assistant() {
                 <TextContent>
                     <Text component={TextVariants.h2}>Description</Text>
                     <Text component={TextVariants.p}>{assistantInfo.description}</Text>
+                </TextContent>
+                <TextContent>
+                    <Text component={TextVariants.h2}>Model</Text>
+                    <Text component={TextVariants.p}>{assistantInfo.model}</Text>
                 </TextContent>
                 <TextContent>
                     <Text component={TextVariants.h2}>System Prompt</Text>
