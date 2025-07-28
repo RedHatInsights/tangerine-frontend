@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-18 AS builder
+FROM registry.access.redhat.com/ubi9/nodejs-22 AS builder
 
 ADD package.json $HOME
 ADD package-lock.json $HOME
@@ -17,7 +17,7 @@ ENV PORT=3000
 RUN npm -d install
 RUN npm run -d build
 
-FROM registry.access.redhat.com/ubi9/nodejs-18-minimal
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal
 
 COPY --from=builder $HOME/build $HOME/build
 
