@@ -25,27 +25,26 @@ import {
     DualListSelectorControl,
 } from "@patternfly/react-core";
 import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon";
+import AngleDoubleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-double-left-icon";
 import AngleDoubleRightIcon from "@patternfly/react-icons/dist/esm/icons/angle-double-right-icon";
 import AngleRightIcon from "@patternfly/react-icons/dist/esm/icons/angle-right-icon";
-import AngleLeftIcon2 from "@patternfly/react-icons/dist/esm/icons/angle-left-icon";
-import AngleDoubleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-double-left-icon";
 
 function Assistant() {
     const { assistantId } = useParams();
 
     const [assistantInfo, setAssistantInfo] = useState({
-        id: '', 
-        name: '', 
-        description: '', 
-        system_prompt: '', 
-        model: '', 
+        id: '',
+        name: '',
+        description: '',
+        system_prompt: '',
+        model: '',
         knowledgebases: []
     });
     const [modalAssistantInfo, setModalAssistantInfo] = useState({
-        id: '', 
-        name: '', 
-        description: '', 
-        system_prompt: '', 
+        id: '',
+        name: '',
+        description: '',
+        system_prompt: '',
         model: ''
     });
 
@@ -92,28 +91,30 @@ function Assistant() {
             .then(response => {
                 const allKBs = response.data.data || response.data;
                 setAllKnowledgeBases(allKBs);
-                
+
                 // Load currently assigned knowledge bases
-                return axios.get(`/api/assistants/${assistantId}/knowledgebases`);
-            })
-            .then(response => {
-                const assigned = response.data.data || response.data;
-                const assignedIds = assigned.map(kb => kb.id);
-                
-                setAssignedKBs(assigned.map(kb => ({ 
-                    id: kb.id, 
-                    content: kb.name,
-                    isSelected: false 
-                })));
-                
-                setAvailableKBs(allKnowledgeBases
-                    .filter(kb => !assignedIds.includes(kb.id))
-                    .map(kb => ({ 
-                        id: kb.id, 
-                        content: kb.name,
-                        isSelected: false 
-                    }))
-                );
+                return axios.get(`/api/assistants/${assistantId}/knowledgebases`)
+                    .then(assignedResponse => {
+                        const assigned = assignedResponse.data.data || assignedResponse.data;
+                        const assignedIds = assigned.map(kb => kb.id);
+
+                        setAssignedKBs(assigned.map(kb => ({
+                            id: kb.id,
+                            text: kb.name,
+                            selected: false,
+                            isVisible: true
+                        })));
+
+                        setAvailableKBs(allKBs
+                            .filter(kb => !assignedIds.includes(kb.id))
+                            .map(kb => ({
+                                id: kb.id,
+                                text: kb.name,
+                                selected: false,
+                                isVisible: true
+                            }))
+                        );
+                    });
             })
             .catch(error => {
                 console.error('Error loading knowledge bases:', error);
@@ -140,7 +141,7 @@ function Assistant() {
         const { name, value } = e.target;
         setModalAssistantInfo({
             ...modalAssistantInfo,
-            [name]: value          
+            [name]: value
         });
     };
 
@@ -150,43 +151,64 @@ function Assistant() {
     };
 
     const saveKnowledgeBaseAssignments = () => {
-        // Get currently assigned KB IDs
-        axios.get(`/api/assistants/${assistantId}/knowledgebases`)
-            .then(response => {
-                const currentlyAssigned = response.data.data || response.data;
-                const currentIds = currentlyAssigned.map(kb => kb.id);
-                const newIds = assignedKBs.map(kb => kb.id);
-                
-                // Remove unassigned KBs
-                const toRemove = currentIds.filter(id => !newIds.includes(id));
-                const removePromises = toRemove.map(kbId => 
-                    axios.delete(`/api/assistants/${assistantId}/knowledgebases`, {
-                        data: { knowledgebase_id: kbId }
-                    })
-                );
-                
-                // Add newly assigned KBs
-                const toAdd = newIds.filter(id => !currentIds.includes(id));
-                const addPromises = toAdd.map(kbId => 
-                    axios.post(`/api/assistants/${assistantId}/knowledgebases`, {
-                        knowledgebase_id: kbId
-                    })
-                );
-                
-                return Promise.all([...removePromises, ...addPromises]);
-            })
-            .then(() => {
-                getAssistantInfo();
-                handleKBModalToggle();
-            })
-            .catch(error => {
-                console.error('Error updating knowledge base assignments:', error);
-            });
+        const newIds = assignedKBs.map(kb => kb.id);
+        
+        // Send all knowledge base IDs in a single request
+        axios.post(`/api/assistants/${assistantId}/knowledgebases`, {
+            knowledgebase_ids: newIds
+        })
+        .then(() => {
+            getAssistantInfo();
+            handleKBModalToggle();
+        })
+        .catch(error => {
+            console.error('Error updating knowledge base assignments:', error);
+        });
     };
 
-    const onListChange = (newAvailableOptions, newChosenOptions) => {
-        setAvailableKBs(newAvailableOptions);
-        setAssignedKBs(newChosenOptions);
+    const moveSelected = (fromAvailable) => {
+        const sourceOptions = fromAvailable ? availableKBs : assignedKBs;
+        const destinationOptions = fromAvailable ? assignedKBs : availableKBs;
+
+        for (let i = 0; i < sourceOptions.length; i++) {
+            const option = sourceOptions[i];
+            if (option.selected && option.isVisible) {
+                sourceOptions.splice(i, 1);
+                destinationOptions.push(option);
+                option.selected = false;
+                i--;
+            }
+        }
+
+        if (fromAvailable) {
+            setAvailableKBs([...sourceOptions]);
+            setAssignedKBs([...destinationOptions]);
+        } else {
+            setAssignedKBs([...sourceOptions]);
+            setAvailableKBs([...destinationOptions]);
+        }
+    };
+
+    const moveAll = (fromAvailable) => {
+        if (fromAvailable) {
+            setAssignedKBs([...availableKBs.filter(option => option.isVisible), ...assignedKBs]);
+            setAvailableKBs([...availableKBs.filter(option => !option.isVisible)]);
+        } else {
+            setAvailableKBs([...assignedKBs.filter(option => option.isVisible), ...availableKBs]);
+            setAssignedKBs([...assignedKBs.filter(option => !option.isVisible)]);
+        }
+    };
+
+    const onOptionSelect = (event, index, isChosen) => {
+        if (isChosen) {
+            const newChosen = [...assignedKBs];
+            newChosen[index].selected = !assignedKBs[index].selected;
+            setAssignedKBs(newChosen);
+        } else {
+            const newAvailable = [...availableKBs];
+            newAvailable[index].selected = !availableKBs[index].selected;
+            setAvailableKBs(newAvailable);
+        }
     };
 
     return(
@@ -213,7 +235,7 @@ function Assistant() {
                 </TextContent>
                 <TextContent>
                     <Text component={TextVariants.h2}>Associated Knowledge Bases</Text>
-                    { assistantInfo.knowledgebases && assistantInfo.knowledgebases.length === 0 && 
+                    { assistantInfo.knowledgebases && assistantInfo.knowledgebases.length === 0 &&
                       <Text component={TextVariants.p}>No knowledge bases associated.</Text> }
                 </TextContent>
                 <Panel isScrollable>
@@ -237,7 +259,7 @@ function Assistant() {
                     <Button variant="warning" onClick={() => navigate(`/assistants/${assistantId}/chat`)}>Chat With {assistantInfo.name}</Button>
                 </div>
             </div>
-            
+
             {/* Assistant Info Modal */}
             <Modal
                 variant={ModalVariant.small}
@@ -292,42 +314,75 @@ function Assistant() {
                 ]}
             >
                 <DualListSelector>
-                    <DualListSelectorPane title="Available Knowledge Bases">
+                    <DualListSelectorPane
+                        title="Available Knowledge Bases"
+                        status={`${availableKBs.filter(option => option.selected && option.isVisible).length} of ${availableKBs.filter(option => option.isVisible).length} options selected`}
+                    >
                         <DualListSelectorList>
-                            {availableKBs.map(kb => (
-                                <DualListSelectorListItem key={kb.id} id={kb.id} isSelected={kb.isSelected}>
-                                    {kb.content}
-                                </DualListSelectorListItem>
-                            ))}
+                            {availableKBs.map((option, index) =>
+                                option.isVisible ? (
+                                    <DualListSelectorListItem
+                                        key={option.id}
+                                        isSelected={option.selected}
+                                        id={`available-option-${index}`}
+                                        onOptionSelect={e => onOptionSelect(e, index, false)}
+                                    >
+                                        {option.text}
+                                    </DualListSelectorListItem>
+                                ) : null
+                            )}
                         </DualListSelectorList>
                     </DualListSelectorPane>
-                    
+
                     <DualListSelectorControlsWrapper>
-                        <DualListSelectorControl 
-                            icon={<AngleDoubleRightIcon />}
-                            aria-label="Add all"
-                        />
-                        <DualListSelectorControl 
-                            icon={<AngleRightIcon />}
+                        <DualListSelectorControl
+                            isDisabled={!availableKBs.some(option => option.selected)}
+                            onClick={() => moveSelected(true)}
                             aria-label="Add selected"
-                        />
-                        <DualListSelectorControl 
-                            icon={<AngleLeftIcon2 />}
-                            aria-label="Remove selected"
-                        />
-                        <DualListSelectorControl 
-                            icon={<AngleDoubleLeftIcon />}
+                        >
+                            <AngleRightIcon />
+                        </DualListSelectorControl>
+                        <DualListSelectorControl
+                            isDisabled={availableKBs.length === 0}
+                            onClick={() => moveAll(true)}
+                            aria-label="Add all"
+                        >
+                            <AngleDoubleRightIcon />
+                        </DualListSelectorControl>
+                        <DualListSelectorControl
+                            isDisabled={assignedKBs.length === 0}
+                            onClick={() => moveAll(false)}
                             aria-label="Remove all"
-                        />
+                        >
+                            <AngleDoubleLeftIcon />
+                        </DualListSelectorControl>
+                        <DualListSelectorControl
+                            onClick={() => moveSelected(false)}
+                            isDisabled={!assignedKBs.some(option => option.selected)}
+                            aria-label="Remove selected"
+                        >
+                            <AngleLeftIcon />
+                        </DualListSelectorControl>
                     </DualListSelectorControlsWrapper>
-                    
-                    <DualListSelectorPane title="Associated Knowledge Bases" isChosen>
+
+                    <DualListSelectorPane
+                        title="Associated Knowledge Bases"
+                        status={`${assignedKBs.filter(option => option.selected && option.isVisible).length} of ${assignedKBs.filter(option => option.isVisible).length} options selected`}
+                        isChosen
+                    >
                         <DualListSelectorList>
-                            {assignedKBs.map(kb => (
-                                <DualListSelectorListItem key={kb.id} id={kb.id} isSelected={kb.isSelected}>
-                                    {kb.content}
-                                </DualListSelectorListItem>
-                            ))}
+                            {assignedKBs.map((option, index) =>
+                                option.isVisible ? (
+                                    <DualListSelectorListItem
+                                        key={option.id}
+                                        isSelected={option.selected}
+                                        id={`chosen-option-${index}`}
+                                        onOptionSelect={e => onOptionSelect(e, index, true)}
+                                    >
+                                        {option.text}
+                                    </DualListSelectorListItem>
+                                ) : null
+                            )}
                         </DualListSelectorList>
                     </DualListSelectorPane>
                 </DualListSelector>

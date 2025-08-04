@@ -43,8 +43,9 @@ function KnowledgeBase() {
     const getKbInfo = () => {
         axios.get(`/api/knowledgebases/${knowledgeBaseId}`)
           .then(response => {
-            setKbInfo(response.data);
-            setModalKbInfo(response.data);
+            const kbData = response.data.data || response.data;
+            setKbInfo(kbData);
+            setModalKbInfo(kbData);
           })
           .catch(error => {
             console.error('Error fetching knowledge base:', error);

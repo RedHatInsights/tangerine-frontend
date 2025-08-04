@@ -139,7 +139,12 @@ const KnowledgeBases = () => {
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
                 actions={[
-                  <Button key="addkb" variant="primary" onClick={confirmHandler}>
+                  <Button 
+                    key="addkb" 
+                    variant="primary" 
+                    onClick={confirmHandler}
+                    isDisabled={!knowledgeBaseData.name.trim() || !knowledgeBaseData.description.trim()}
+                  >
                     Confirm
                   </Button>,
                   <Button key="cancel" variant="link" onClick={handleModalToggle}>
