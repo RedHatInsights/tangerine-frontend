@@ -11,9 +11,19 @@ const Header = () => {
             <MastheadBrand><Button variant="plain" onClick={() => navigate("/")}>🍊</Button></MastheadBrand>
             </MastheadMain>
             <MastheadContent>
-                <Button variant="plain" onClick={() => navigate("/")}>
+                <Button variant="plain" onClick={() => navigate("/")} style={{"marginRight": "1rem"}}>
                     <TextContent  style={{"color": "black"}}>
                         <Text component={TextVariants.h3}>Tangerine</Text>
+                    </TextContent>
+                </Button>
+                <Button variant="plain" onClick={() => navigate("/")} style={{"marginRight": "1rem"}}>
+                    <TextContent  style={{"color": "black"}}>
+                        <Text component={TextVariants.h4}>Assistants</Text>
+                    </TextContent>
+                </Button>
+                <Button variant="plain" onClick={() => navigate("/knowledgebases")}>
+                    <TextContent  style={{"color": "black"}}>
+                        <Text component={TextVariants.h4}>Knowledge Bases</Text>
                     </TextContent>
                 </Button>                
             </MastheadContent>

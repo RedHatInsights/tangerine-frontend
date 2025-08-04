@@ -1,7 +1,6 @@
-import axios from "axios"
-
-import React, { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
     TextContent,
     Text,
@@ -18,43 +17,111 @@ import {
     Form,
     FormGroup,
     TextInput,
-} from "@patternfly/react-core"
-import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon"
+    DualListSelector,
+    DualListSelectorPane,
+    DualListSelectorList,
+    DualListSelectorListItem,
+    DualListSelectorControlsWrapper,
+    DualListSelectorControl,
+} from "@patternfly/react-core";
+import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon";
+import AngleDoubleRightIcon from "@patternfly/react-icons/dist/esm/icons/angle-double-right-icon";
+import AngleRightIcon from "@patternfly/react-icons/dist/esm/icons/angle-right-icon";
+import AngleLeftIcon2 from "@patternfly/react-icons/dist/esm/icons/angle-left-icon";
+import AngleDoubleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-double-left-icon";
 
 function Assistant() {
-    const { assistantId } = useParams()
+    const { assistantId } = useParams();
 
-    const [assistantInfo, setassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', model: '', filenames: []})
-    const [modalassistantInfo, setModalassistantInfo] = useState({id: '', name: '', description: '', system_prompt: '', model: '', filenames: []})
+    const [assistantInfo, setAssistantInfo] = useState({
+        id: '', 
+        name: '', 
+        description: '', 
+        system_prompt: '', 
+        model: '', 
+        knowledgebases: []
+    });
+    const [modalAssistantInfo, setModalAssistantInfo] = useState({
+        id: '', 
+        name: '', 
+        description: '', 
+        system_prompt: '', 
+        model: ''
+    });
 
-    const navigate = useNavigate()
+    const [allKnowledgeBases, setAllKnowledgeBases] = useState([]);
+    const [availableKBs, setAvailableKBs] = useState([]);
+    const [assignedKBs, setAssignedKBs] = useState([]);
+    const [isKBModalOpen, setKBModalOpen] = useState(false);
+
+    const navigate = useNavigate();
 
     const [isModalOpen, setModalOpen] = React.useState(false);
     const handleModalToggle = (_event) => {
-      if (!isModalOpen) {
-        // Reset modal state to current assistant info when opening
-        setModalassistantInfo({...assistantInfo});
-      }
-      setModalOpen(!isModalOpen);
+        if (!isModalOpen) {
+            setModalAssistantInfo({...assistantInfo});
+        }
+        setModalOpen(!isModalOpen);
+    };
+
+    const handleKBModalToggle = () => {
+        if (!isKBModalOpen) {
+            loadKnowledgeBasesForSelection();
+        }
+        setKBModalOpen(!isKBModalOpen);
     };
 
     useEffect(() => {
-        getassistantInfo();
-      }, []);
+        getAssistantInfo();
+    }, []);
 
-    const getassistantInfo = () => {
+    const getAssistantInfo = () => {
         axios.get(`/api/assistants/${assistantId}`)
-          .then(response => {
-            setassistantInfo(response.data)
-            setModalassistantInfo(response.data)
-          })
-          .catch(error => {
-            console.error('Error fetching assistants:', error);
-          });
+            .then(response => {
+                setAssistantInfo(response.data);
+                setModalAssistantInfo(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching assistant:', error);
+            });
     };
 
-    const updateassistant = () => {
-        const { name, description, system_prompt, model } = modalassistantInfo;
+    const loadKnowledgeBasesForSelection = () => {
+        // Load all knowledge bases
+        axios.get('/api/knowledgebases')
+            .then(response => {
+                const allKBs = response.data.data || response.data;
+                setAllKnowledgeBases(allKBs);
+                
+                // Load currently assigned knowledge bases
+                return axios.get(`/api/assistants/${assistantId}/knowledgebases`);
+            })
+            .then(response => {
+                const assigned = response.data.data || response.data;
+                const assignedIds = assigned.map(kb => kb.id);
+                
+                setAssignedKBs(assigned.map(kb => ({ 
+                    id: kb.id, 
+                    content: kb.name,
+                    isSelected: false 
+                })));
+                
+                setAvailableKBs(allKnowledgeBases
+                    .filter(kb => !assignedIds.includes(kb.id))
+                    .map(kb => ({ 
+                        id: kb.id, 
+                        content: kb.name,
+                        isSelected: false 
+                    }))
+                );
+            })
+            .catch(error => {
+                console.error('Error loading knowledge bases:', error);
+            });
+    };
+
+    const updateAssistant = () => {
+        const { name, description, system_prompt, model } = modalAssistantInfo;
         axios.put(`/api/assistants/${assistantId}`, {
             "name": name,
             "description": description,
@@ -62,43 +129,70 @@ function Assistant() {
             "model": model
         })
         .then(() => {
-            getassistantInfo();
+            getAssistantInfo();
         })
         .catch(error => {
             console.error('Error updating assistant:', error);
-        })
-    }
+        });
+    };
 
     const handleChange = (e) => {
-        const { name, value, files } = e.target;
-        setModalassistantInfo({
-            ...modalassistantInfo,
-            [name]: files ? files[0] : value          
-        })
-    }
+        const { name, value } = e.target;
+        setModalAssistantInfo({
+            ...modalAssistantInfo,
+            [name]: value          
+        });
+    };
 
     const confirmHandler = () => {
-        updateassistant();
+        updateAssistant();
         handleModalToggle();
-    }
+    };
 
-    const uploadFile = (assistant) => {
-        const file = assistant.target.files[0];
-        const formData = new FormData();
-        formData.append("file", file);
-        axios.post(`/api/assistants/${assistantId}/documents`, formData)
-          .then(() =>
-          getassistantInfo()
-        )
-          .catch(error => {
-            console.error('Error uploading file:', error);
-          })
-      }
+    const saveKnowledgeBaseAssignments = () => {
+        // Get currently assigned KB IDs
+        axios.get(`/api/assistants/${assistantId}/knowledgebases`)
+            .then(response => {
+                const currentlyAssigned = response.data.data || response.data;
+                const currentIds = currentlyAssigned.map(kb => kb.id);
+                const newIds = assignedKBs.map(kb => kb.id);
+                
+                // Remove unassigned KBs
+                const toRemove = currentIds.filter(id => !newIds.includes(id));
+                const removePromises = toRemove.map(kbId => 
+                    axios.delete(`/api/assistants/${assistantId}/knowledgebases`, {
+                        data: { knowledgebase_id: kbId }
+                    })
+                );
+                
+                // Add newly assigned KBs
+                const toAdd = newIds.filter(id => !currentIds.includes(id));
+                const addPromises = toAdd.map(kbId => 
+                    axios.post(`/api/assistants/${assistantId}/knowledgebases`, {
+                        knowledgebase_id: kbId
+                    })
+                );
+                
+                return Promise.all([...removePromises, ...addPromises]);
+            })
+            .then(() => {
+                getAssistantInfo();
+                handleKBModalToggle();
+            })
+            .catch(error => {
+                console.error('Error updating knowledge base assignments:', error);
+            });
+    };
+
+    const onListChange = (newAvailableOptions, newChosenOptions) => {
+        setAvailableKBs(newAvailableOptions);
+        setAssignedKBs(newChosenOptions);
+    };
 
     return(
         <div style={{"marginLeft": "2.5rem"}}>
             <div style={{"paddingTop": "1rem", "paddingBottom": "2rem"}}>
-                <Button variant="secondary" icon={<AngleLeftIcon/>} onClick={() => navigate("/")}>Back</Button>
+                <Button variant="secondary" icon={<AngleLeftIcon/>} onClick={() => navigate("/")}>Back to Assistants</Button>
             </div>
             <TextContent style={{"display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "35rem"}}>
                 <TextContent>
@@ -118,36 +212,33 @@ function Assistant() {
                     <Text component={TextVariants.p}>{assistantInfo.system_prompt}</Text>
                 </TextContent>
                 <TextContent>
-                    <Text component={TextVariants.h2}>Uploaded File(s)</Text>
-                    { assistantInfo.filenames.length === 0 && <Text component={TextVariants.p}>No files uploaded.</Text> }
+                    <Text component={TextVariants.h2}>Associated Knowledge Bases</Text>
+                    { assistantInfo.knowledgebases && assistantInfo.knowledgebases.length === 0 && 
+                      <Text component={TextVariants.p}>No knowledge bases associated.</Text> }
                 </TextContent>
                 <Panel isScrollable>
                     <PanelMain tabIndex={0}>
                         <PanelMainBody>
                             <List>
                                 {
-                                    assistantInfo.filenames.map(filename => <ListItem key={filename}>{filename}</ListItem>)
+                                    assistantInfo.knowledgebases && assistantInfo.knowledgebases.map(kb => (
+                                        <ListItem key={kb.id}>{kb.name}</ListItem>
+                                    ))
                                 }
                             </List>
                         </PanelMainBody>
                     </PanelMain>
                 </Panel>
             </TextContent>
-            <TextContent>
-                    <Text component={TextVariants.p}>Supported file formats: ".md", ".txt" and ".pdf"</Text>
-                </TextContent>
             <div style={{"display": "flex", "flexDirection": "column", "height": "7rem", "justifyContent": "space-around"}}>
-                <input
-                    id={assistantId}
-                    type="file"
-                    name="file"
-                    onChange={uploadFile}
-                />
-                <div style={{"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "width": "25rem"}}>
-                    <Button variant="primary" onClick={handleModalToggle}>Modify assistant Info</Button>
-                    <Button variant="warning" onClick={() => navigate(`/${assistantId}/chat`)}>Chat With {assistantInfo.name}</Button>
+                <div style={{"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "width": "35rem"}}>
+                    <Button variant="primary" onClick={handleModalToggle}>Modify Assistant Info</Button>
+                    <Button variant="secondary" onClick={handleKBModalToggle}>Manage Knowledge Bases</Button>
+                    <Button variant="warning" onClick={() => navigate(`/assistants/${assistantId}/chat`)}>Chat With {assistantInfo.name}</Button>
                 </div>
             </div>
+            
+            {/* Assistant Info Modal */}
             <Modal
                 variant={ModalVariant.small}
                 title="Update assistant"
@@ -155,36 +246,94 @@ function Assistant() {
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
                 actions={[
-                  <Button key="addassistant" variant="primary" form="add-assistant-button" onClick={confirmHandler}>
+                  <Button key="updateassistant" variant="primary" onClick={confirmHandler}>
                     Confirm
                   </Button>,
                   <Button key="cancel" variant="link" onClick={handleModalToggle}>
                     Cancel
                   </Button>
                 ]}
-              >
-                  <Form>
+            >
+                <Form>
                     <FormGroup>
-                      <FormGroup label="Assistant Name" isRequired>
-                        <TextInput id="name" isRequired type="text" name="name" value={modalassistantInfo.name} onChange={handleChange}/>
-                      </FormGroup>
+                        <FormGroup label="Assistant Name" isRequired>
+                            <TextInput id="name" isRequired type="text" name="name" value={modalAssistantInfo.name} onChange={handleChange}/>
+                        </FormGroup>
 
-                      <FormGroup label="Assistant Description" isRequired>
-                        <TextInput id="description" isRequired type="text" name="description" value={modalassistantInfo.description} onChange={handleChange} />
-                      </FormGroup>
+                        <FormGroup label="Assistant Description" isRequired>
+                            <TextInput id="description" isRequired type="text" name="description" value={modalAssistantInfo.description} onChange={handleChange} />
+                        </FormGroup>
 
-                      <FormGroup label="Model" isRequired>
-                        <TextInput id="model" isRequired type="text" name="model" value={modalassistantInfo.model} onChange={handleChange} />
-                      </FormGroup>
+                        <FormGroup label="Model" isRequired>
+                            <TextInput id="model" isRequired type="text" name="model" value={modalAssistantInfo.model} onChange={handleChange} />
+                        </FormGroup>
 
-                      <FormGroup label="System Prompt" isRequired>
-                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalassistantInfo.system_prompt} onChange={handleChange} />
-                      </FormGroup>
+                        <FormGroup label="System Prompt" isRequired>
+                            <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalAssistantInfo.system_prompt} onChange={handleChange} />
+                        </FormGroup>
                     </FormGroup>
-                  </Form>
-              </Modal>
+                </Form>
+            </Modal>
+
+            {/* Knowledge Base Assignment Modal */}
+            <Modal
+                variant={ModalVariant.large}
+                title="Manage Knowledge Base Associations"
+                description="Select which knowledge bases this assistant should have access to."
+                isOpen={isKBModalOpen}
+                onClose={handleKBModalToggle}
+                actions={[
+                  <Button key="savekb" variant="primary" onClick={saveKnowledgeBaseAssignments}>
+                    Save Changes
+                  </Button>,
+                  <Button key="cancel" variant="link" onClick={handleKBModalToggle}>
+                    Cancel
+                  </Button>
+                ]}
+            >
+                <DualListSelector>
+                    <DualListSelectorPane title="Available Knowledge Bases">
+                        <DualListSelectorList>
+                            {availableKBs.map(kb => (
+                                <DualListSelectorListItem key={kb.id} id={kb.id} isSelected={kb.isSelected}>
+                                    {kb.content}
+                                </DualListSelectorListItem>
+                            ))}
+                        </DualListSelectorList>
+                    </DualListSelectorPane>
+                    
+                    <DualListSelectorControlsWrapper>
+                        <DualListSelectorControl 
+                            icon={<AngleDoubleRightIcon />}
+                            aria-label="Add all"
+                        />
+                        <DualListSelectorControl 
+                            icon={<AngleRightIcon />}
+                            aria-label="Add selected"
+                        />
+                        <DualListSelectorControl 
+                            icon={<AngleLeftIcon2 />}
+                            aria-label="Remove selected"
+                        />
+                        <DualListSelectorControl 
+                            icon={<AngleDoubleLeftIcon />}
+                            aria-label="Remove all"
+                        />
+                    </DualListSelectorControlsWrapper>
+                    
+                    <DualListSelectorPane title="Associated Knowledge Bases" isChosen>
+                        <DualListSelectorList>
+                            {assignedKBs.map(kb => (
+                                <DualListSelectorListItem key={kb.id} id={kb.id} isSelected={kb.isSelected}>
+                                    {kb.content}
+                                </DualListSelectorListItem>
+                            ))}
+                        </DualListSelectorList>
+                    </DualListSelectorPane>
+                </DualListSelector>
+            </Modal>
         </div>
-    )
+    );
 }
 
-export default Assistant
+export default Assistant;

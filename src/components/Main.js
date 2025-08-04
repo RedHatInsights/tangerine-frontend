@@ -26,7 +26,7 @@ const Main = () => {
     name: '',
     description: '',
     system_prompt: '',
-    file: null
+    model: ''
   });
 
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const Main = () => {
             name: '',
             description: '',
             system_prompt: response.data.system_prompt,
-            file: null
+            model: response.data.model || ''
           });
           setDefaultsLoading(false);
         })
@@ -65,10 +65,10 @@ const Main = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
     setassistantData({
       ...assistantData,
-      [name]: files ? files[0] : value
+      [name]: value
     })
   }
 
@@ -90,7 +90,7 @@ const Main = () => {
           name: '',
           description: '',
           system_prompt: '',
-          file: null
+          model: ''
         });
         getassistants();
       })
@@ -134,13 +134,13 @@ const Main = () => {
               <Tbody>
                 {data.map(assistant => (
                   <Tr key={assistant.id}>
-                    <Td><Link to={`/${assistant.id}`}>{assistant.name}</Link></Td>
+                    <Td><Link to={`/assistants/${assistant.id}`}>{assistant.name}</Link></Td>
                     <Td>{assistant.description}</Td>
                     <Td>
-                      <Button id={assistant.id} onClick={() => navigate(`/${assistant.id}/chat`)} variant="warning">Chat</Button>
+                      <Button id={assistant.id} onClick={() => navigate(`/assistants/${assistant.id}/chat`)} variant="warning">Chat</Button>
                     </Td>
                     <Td>
-                      <Button id={assistant.id} onClick={() => navigate(`/${assistant.id}`)} variant="secondary">Modify</Button>
+                      <Button id={assistant.id} onClick={() => navigate(`/assistants/${assistant.id}`)} variant="secondary">Modify</Button>
                     </Td>
                     <Td>
                       <Button id={assistant.id} onClick={deleteassistant} variant="danger">Delete</Button>
@@ -175,6 +175,10 @@ const Main = () => {
 
                       <FormGroup label="Assistant Description" isRequired>
                         <TextInput id="description" isRequired type="text" name="description" value={assistantData.description} onChange={handleChange} />
+                      </FormGroup>
+
+                      <FormGroup label="Model" isRequired>
+                        <TextInput id="model" isRequired type="text" name="model" value={assistantData.model} onChange={handleChange} />
                       </FormGroup>
 
                       <FormGroup label="System Prompt" isRequired>
