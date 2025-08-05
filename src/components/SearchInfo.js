@@ -38,7 +38,8 @@ const SearchInfo = ({ searchData }) => {
   };
 
   return (
-    searchData.length > 0 && (
+    searchData.length > 0 &&
+    searchData[0].metadata?.filename && (
       <ExpandableSection
         toggleText={isExpanded ? 'Hide search data' : 'Show search data'}
         onToggle={onToggle}
