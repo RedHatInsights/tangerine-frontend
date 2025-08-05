@@ -55,6 +55,12 @@ const Main = () => {
     }
   };
 
+  const isFormValid = () => {
+    return assistantData.name &&
+           assistantData.description &&
+           assistantData.system_prompt;
+  };
+
   const confirmHandler = () => {
     addassistant();
     handleModalToggle();
@@ -159,7 +165,7 @@ const Main = () => {
                 onClose={handleModalToggle}
                 footer={defaultsLoading ? (<p>Loading assistant defaults...</p>) : null}
                 actions={[
-                  <Button key="addassistant" variant="primary" form="add-assistant-button" onClick={confirmHandler}>
+                  <Button key="addassistant" variant="primary" form="add-assistant-button" onClick={confirmHandler} isDisabled={!isFormValid()}>
                     Confirm
                   </Button>,
                   <Button key="cancel" variant="link" onClick={handleModalToggle}>
@@ -177,12 +183,12 @@ const Main = () => {
                         <TextInput id="description" isRequired type="text" name="description" value={assistantData.description} onChange={handleChange} />
                       </FormGroup>
 
-                      <FormGroup label="Model" isRequired>
-                        <TextInput id="model" isRequired type="text" name="model" value={assistantData.model} onChange={handleChange} />
+                      <FormGroup label="Model (leave blank for default)">
+                        <TextInput id="model" type="text" name="model" value={assistantData.model} onChange={handleChange} />
                       </FormGroup>
 
                       <FormGroup label="System Prompt" isRequired>
-                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={assistantData.system_prompt} onChange={handleChange} />
+                        <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={assistantData.system_prompt} onChange={handleChange} style={{ fontFamily: 'monospace' }} />
                       </FormGroup>
                     </FormGroup>
                   </Form>

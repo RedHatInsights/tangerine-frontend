@@ -23,11 +23,18 @@ import {
     DualListSelectorListItem,
     DualListSelectorControlsWrapper,
     DualListSelectorControl,
+    SimpleList,
+    SimpleListItem,
+    DescriptionList,
+    DescriptionListTerm,
+    DescriptionListGroup,
+    DescriptionListDescription,
 } from "@patternfly/react-core";
 import AngleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-left-icon";
 import AngleDoubleLeftIcon from "@patternfly/react-icons/dist/esm/icons/angle-double-left-icon";
 import AngleDoubleRightIcon from "@patternfly/react-icons/dist/esm/icons/angle-double-right-icon";
 import AngleRightIcon from "@patternfly/react-icons/dist/esm/icons/angle-right-icon";
+import ExternalLinkSquareAltIcon from "@patternfly/react-icons/dist/esm/icons/external-link-square-alt-icon";
 
 function Assistant() {
     const { assistantId } = useParams();
@@ -145,6 +152,12 @@ function Assistant() {
         });
     };
 
+    const isFormValid = () => {
+        return modalAssistantInfo.name &&
+               modalAssistantInfo.description &&
+               modalAssistantInfo.system_prompt;
+    };
+
     const confirmHandler = () => {
         updateAssistant();
         handleModalToggle();
@@ -152,7 +165,7 @@ function Assistant() {
 
     const saveKnowledgeBaseAssignments = () => {
         const newIds = assignedKBs.map(kb => kb.id);
-        
+
         // Send all knowledge base IDs in a single request
         axios.post(`/api/assistants/${assistantId}/knowledgebases`, {
             knowledgebase_ids: newIds
@@ -216,46 +229,53 @@ function Assistant() {
             <div style={{"paddingTop": "1rem", "paddingBottom": "2rem"}}>
                 <Button variant="secondary" icon={<AngleLeftIcon/>} onClick={() => navigate("/")}>Back to Assistants</Button>
             </div>
-            <TextContent style={{"display": "flex", "flexDirection": "column", "justifyContent": "space-around", "height": "35rem"}}>
-                <TextContent>
-                    <Text component={TextVariants.h2}>Assistant Name</Text>
-                    <Text component={TextVariants.p}>{assistantInfo.name}</Text>
-                </TextContent>
-                <TextContent>
-                    <Text component={TextVariants.h2}>Description</Text>
-                    <Text component={TextVariants.p}>{assistantInfo.description}</Text>
-                </TextContent>
-                <TextContent>
-                    <Text component={TextVariants.h2}>Model</Text>
-                    <Text component={TextVariants.p}>{assistantInfo.model}</Text>
-                </TextContent>
-                <TextContent>
-                    <Text component={TextVariants.h2}>System Prompt</Text>
-                    <Text component={TextVariants.p}>{assistantInfo.system_prompt}</Text>
-                </TextContent>
-                <TextContent>
-                    <Text component={TextVariants.h2}>Associated Knowledge Bases</Text>
-                    { assistantInfo.knowledgebases && assistantInfo.knowledgebases.length === 0 &&
-                      <Text component={TextVariants.p}>No knowledge bases associated.</Text> }
-                </TextContent>
-                <Panel isScrollable>
-                    <PanelMain tabIndex={0}>
-                        <PanelMainBody>
-                            <List>
-                                {
-                                    assistantInfo.knowledgebases && assistantInfo.knowledgebases.map(kb => (
-                                        <ListItem key={kb.id}>{kb.name}</ListItem>
+            <div style={{ marginBottom: '2rem' }}>
+                <DescriptionList isHorizontal isCompact aria-label="Assistant Details">
+                    <DescriptionListGroup>
+                        <DescriptionListTerm>Assistant Name</DescriptionListTerm>
+                        <DescriptionListDescription>{assistantInfo.name}</DescriptionListDescription>
+                    </DescriptionListGroup>
+                    <DescriptionListGroup>
+                        <DescriptionListTerm>Description</DescriptionListTerm>
+                        <DescriptionListDescription>{assistantInfo.description}</DescriptionListDescription>
+                    </DescriptionListGroup>
+                    <DescriptionListGroup>
+                        <DescriptionListTerm>Associated Knowledge Bases</DescriptionListTerm>
+                        <DescriptionListDescription>
+                            <SimpleList aria-label="Associated Knowledge Bases">
+                                {assistantInfo.knowledgebases && assistantInfo.knowledgebases.length > 0
+                                    ? assistantInfo.knowledgebases.map(kb => (
+                                        <SimpleListItem key={kb.id}>{kb.name}</SimpleListItem>
                                     ))
+                                    : <SimpleListItem key="no-kb">No knowledge bases associated.</SimpleListItem>
                                 }
-                            </List>
-                        </PanelMainBody>
-                    </PanelMain>
-                </Panel>
-            </TextContent>
+                            </SimpleList>
+                            <Button variant="link" size="sm" icon={<ExternalLinkSquareAltIcon />} iconPosition="end" onClick={handleKBModalToggle}>Manage Knowledge Bases</Button>
+                        </DescriptionListDescription>
+                    </DescriptionListGroup>
+                    <DescriptionListGroup>
+                        <DescriptionListTerm>Model</DescriptionListTerm>
+                        <DescriptionListDescription>
+                            {assistantInfo.model || <span style={{ color: '#6a6e73', fontStyle: 'italic' }}>Using system default model</span>}
+                        </DescriptionListDescription>
+                    </DescriptionListGroup>
+                    <DescriptionListGroup>
+                        <DescriptionListTerm>System Prompt</DescriptionListTerm>
+                        <DescriptionListDescription>
+                            <TextArea
+                                aria-label="system prompt display"
+                                value={assistantInfo.system_prompt || ''}
+                                readOnlyVariant="default"
+                                rows={10}
+                                style={{ fontFamily: 'monospace' }}
+                            />
+                        </DescriptionListDescription>
+                    </DescriptionListGroup>
+                </DescriptionList>
+            </div>
             <div style={{"display": "flex", "flexDirection": "column", "height": "7rem", "justifyContent": "space-around"}}>
-                <div style={{"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "width": "35rem"}}>
+                <div style={{"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "width": "400px"}}>
                     <Button variant="primary" onClick={handleModalToggle}>Modify Assistant Info</Button>
-                    <Button variant="secondary" onClick={handleKBModalToggle}>Manage Knowledge Bases</Button>
                     <Button variant="warning" onClick={() => navigate(`/assistants/${assistantId}/chat`)}>Chat With {assistantInfo.name}</Button>
                 </div>
             </div>
@@ -268,7 +288,7 @@ function Assistant() {
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
                 actions={[
-                  <Button key="updateassistant" variant="primary" onClick={confirmHandler}>
+                  <Button key="updateassistant" variant="primary" onClick={confirmHandler} isDisabled={!isFormValid()}>
                     Confirm
                   </Button>,
                   <Button key="cancel" variant="link" onClick={handleModalToggle}>
@@ -286,12 +306,12 @@ function Assistant() {
                             <TextInput id="description" isRequired type="text" name="description" value={modalAssistantInfo.description} onChange={handleChange} />
                         </FormGroup>
 
-                        <FormGroup label="Model" isRequired>
-                            <TextInput id="model" isRequired type="text" name="model" value={modalAssistantInfo.model} onChange={handleChange} />
+                        <FormGroup label="Model (leave blank for default)">
+                            <TextInput id="model" type="text" name="model" value={modalAssistantInfo.model} onChange={handleChange} />
                         </FormGroup>
 
                         <FormGroup label="System Prompt" isRequired>
-                            <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalAssistantInfo.system_prompt} onChange={handleChange} />
+                            <TextArea id="prompt" isRequired autoResize resizeOrientation="vertical" type="text" name="system_prompt" value={modalAssistantInfo.system_prompt} onChange={handleChange} style={{ fontFamily: 'monospace' }} />
                         </FormGroup>
                     </FormGroup>
                 </Form>
