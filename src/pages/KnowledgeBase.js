@@ -34,7 +34,7 @@ function KnowledgeBase() {
     id: '',
     name: '',
     description: '',
-    filenames: [],
+    files: [],
   });
   const [modalKbInfo, setModalKbInfo] = useState({
     id: '',
@@ -259,10 +259,10 @@ function KnowledgeBase() {
     });
   };
 
-  const deleteDocument = (filename) => {
+  const deleteDocument = (fullPath) => {
     axios
       .delete(`/api/knowledgebases/${knowledgeBaseId}/documents`, {
-        data: { filename: filename },
+        data: { full_path: fullPath },
       })
       .then(() => getKbInfo())
       .catch((error) => {
@@ -323,25 +323,82 @@ function KnowledgeBase() {
           <DescriptionListGroup>
             <DescriptionListTerm>Uploaded Documents</DescriptionListTerm>
             <DescriptionListDescription>
-              {kbInfo.filenames && kbInfo.filenames.length === 0 ? (
-                <Text component={TextVariants.p}>No documents uploaded.</Text>
-              ) : (
-                <SimpleList>
-                  {kbInfo.filenames &&
-                    kbInfo.filenames.map((filename) => (
-                      <SimpleListItem key={filename}>
-                        <span>{filename}</span>
-                        <Button
-                          variant="plain"
-                          aria-label={`Delete ${filename}`}
-                          onClick={() => deleteDocument(filename)}
-                        >
-                          <TrashIcon />
-                        </Button>
-                      </SimpleListItem>
-                    ))}
-                </SimpleList>
-              )}
+              {(() => {
+                const files = kbInfo.files || [];
+                const activeFiles = files.filter(
+                  (file) => file.active === 'True'
+                );
+                const inactiveFiles = files.filter(
+                  (file) => file.active === 'False'
+                );
+                const pendingRemovalFiles = files.filter(
+                  (file) => file.pending_removal === 'True'
+                );
+
+                return (
+                  <div>
+                    <Text
+                      component={TextVariants.small}
+                      style={{ marginBottom: '1rem', display: 'block' }}
+                    >
+                      Total: {activeFiles.length} active, {inactiveFiles.length}{' '}
+                      inactive, {pendingRemovalFiles.length} pending removal
+                    </Text>
+                    {activeFiles.length === 0 ? (
+                      <Text component={TextVariants.p}>
+                        No active documents.
+                      </Text>
+                    ) : (
+                      <SimpleList>
+                        {activeFiles.map((file) => (
+                          <SimpleListItem key={file.full_path}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                              }}
+                            >
+                              <div style={{ flex: 1 }}>
+                                <Text
+                                  component={TextVariants.small}
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  {file.title}
+                                </Text>
+                                <br />
+                                <Text component={TextVariants.small}>
+                                  Source: {file.source} | Path: {file.full_path}
+                                </Text>
+                              </div>
+                              {file.citation_url &&
+                                file.citation_url !== 'None' && (
+                                  <Button
+                                    variant="link"
+                                    size="sm"
+                                    icon={<ExternalLinkSquareAltIcon />}
+                                    component="a"
+                                    href={file.citation_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={`Open citation for ${file.title}`}
+                                  />
+                                )}
+                              <Button
+                                variant="plain"
+                                aria-label={`Delete ${file.title}`}
+                                onClick={() => deleteDocument(file.full_path)}
+                              >
+                                <TrashIcon />
+                              </Button>
+                            </div>
+                          </SimpleListItem>
+                        ))}
+                      </SimpleList>
+                    )}
+                  </div>
+                );
+              })()}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
