@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.56.0
+    rev: v9.32.0
     hooks:
       - id: eslint
         files: '\.(js|jsx|ts|tsx)$'
@@ -22,7 +22,7 @@ repos:
         additional_dependencies: [prettier@^3.0.0]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-json
       - id: check-yaml
