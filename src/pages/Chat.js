@@ -1,26 +1,26 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import {
   TextContent,
   Text,
   TextVariants,
   TextInput,
-} from "@patternfly/react-core";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import SearchInfo from "../components/SearchInfo";
-import { Button } from "@patternfly/react-core";
-import React from "react";
+} from '@patternfly/react-core';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import SearchInfo from '../components/SearchInfo';
+import { Button } from '@patternfly/react-core';
+import React from 'react';
 
 function Chat() {
   const { assistantId } = useParams();
   const [assistantInfo, setassistantInfo] = useState({
-    name: "",
-    description: "",
+    name: '',
+    description: '',
   });
   const [messages, setMessages] = useState([]);
-  const [chatInput, setChatInput] = useState("");
+  const [chatInput, setChatInput] = useState('');
   const [sessionId, setSessionId] = useState(null);
   const [interactionsGivenFeedback, setInteractionsGivenFeedback] = useState(
     []
@@ -38,9 +38,9 @@ function Chat() {
   };
 
   const handleChatKeyDown = (event) => {
-    if (event.key == "Enter" && chatInput.length > 0) {
-      addMessage("human", chatInput);
-      setChatInput("");
+    if (event.key == 'Enter' && chatInput.length > 0) {
+      addMessage('human', chatInput);
+      setChatInput('');
       sendChatMessage();
     }
   };
@@ -52,15 +52,15 @@ function Chat() {
   const vote = (message, upvote, downvote) => {
     return async () => {
       const response = await fetch(`/api/feedback`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           interactionId: message.interactionId,
           like: upvote,
           dislike: downvote,
-          feedback: "",
+          feedback: '',
         }),
       });
       const data = await response.json();
@@ -78,7 +78,7 @@ function Chat() {
         setassistantInfo(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching assistants:", error);
+        console.error('Error fetching assistants:', error);
       });
   };
 
@@ -89,22 +89,22 @@ function Chat() {
   const sendChatMessage = async () => {
     // Make a POST request with streaming response
     const response = await fetch(`/api/assistants/${assistantId}/chat`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         query: chatInput,
         prevMsgs: messages,
-        stream: "true",
-        client: "tangerine-frontend",
+        stream: 'true',
+        client: 'tangerine-frontend',
         interactionId: crypto.randomUUID(),
         sessionId: sessionId,
       }),
     });
 
     const reader = response.body
-      .pipeThrough(new TextDecoderStream("utf-8"))
+      .pipeThrough(new TextDecoderStream('utf-8'))
       .getReader();
 
     while (true) {
@@ -123,9 +123,9 @@ function Chat() {
         if (text_content || search_metadata) {
           setMessages((prevMessages) => {
             const lastMessage = prevMessages[prevMessages.length - 1];
-            if (lastMessage.sender !== "ai") {
+            if (lastMessage.sender !== 'ai') {
               const newMessage = {
-                sender: "ai",
+                sender: 'ai',
                 text: text_content,
                 done: false,
               };
@@ -158,14 +158,12 @@ function Chat() {
     <>
       <TextContent
         style={{
-          marginLeft: "10rem",
-          paddingTop: "2rem",
-          paddingBottom: "2rem",
+          marginLeft: '10rem',
+          paddingTop: '2rem',
+          paddingBottom: '2rem',
         }}
       >
-        <Text component={TextVariants.h1}>
-          Chat with {assistantInfo.name}
-        </Text>
+        <Text component={TextVariants.h1}>Chat with {assistantInfo.name}</Text>
         <Text component={TextVariants.p}>{assistantInfo.description}</Text>
         <Text component={TextVariants.p}>Session ID: {sessionId}</Text>
       </TextContent>
@@ -173,27 +171,27 @@ function Chat() {
         <div
           className="pf-v5-c-panel pf-m-scrollable"
           style={{
-            marginLeft: "10rem",
-            marginRight: "15rem",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-around",
+            marginLeft: '10rem',
+            marginRight: '15rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-around',
           }}
         >
-          <div className="pf-v5-c-panel__main" style={{ minHeight: "70vh" }}>
+          <div className="pf-v5-c-panel__main" style={{ minHeight: '70vh' }}>
             <div className="pf-v5-c-panel__main-body">
               {messages &&
                 messages.map((message, index) => (
-                  <TextContent key={index} style={{ paddingBottom: "1rem" }}>
+                  <TextContent key={index} style={{ paddingBottom: '1rem' }}>
                     <Text component={TextVariants.h3}>
-                      {message.sender === "ai"
+                      {message.sender === 'ai'
                         ? assistantInfo.name
                         : message.sender}
                     </Text>
                     <Text component={TextVariants.small}>
-                      {message.sender === "ai"
+                      {message.sender === 'ai'
                         ? `Interaction ID: ${message.interactionId}`
-                        : ""}
+                        : ''}
                     </Text>
                     {/* do not format as markdown until text content streaming is finished */}
                     {message.done ? (
@@ -203,10 +201,10 @@ function Chat() {
                     ) : (
                       <Text>{message.text}</Text>
                     )}
-                    {message.sender === "ai" && message.search_metadata && (
+                    {message.sender === 'ai' && message.search_metadata && (
                       <SearchInfo searchData={message.search_metadata} />
                     )}
-                    {message.sender === "ai" &&
+                    {message.sender === 'ai' &&
                       message.done &&
                       !interactionHasFeedback(message.interactionId) && (
                         <React.Fragment>
@@ -224,7 +222,7 @@ function Chat() {
                           </Button>
                         </React.Fragment>
                       )}
-                    {message.sender === "ai" &&
+                    {message.sender === 'ai' &&
                       message.done &&
                       interactionHasFeedback(message.interactionId) && (
                         <Text component={TextVariants.small}>
@@ -235,7 +233,7 @@ function Chat() {
                 ))}
             </div>
           </div>
-          <div className="pf-v5-c-panel__footer" style={{ width: "100%" }}>
+          <div className="pf-v5-c-panel__footer" style={{ width: '100%' }}>
             <TextInput
               type="text"
               value={chatInput}

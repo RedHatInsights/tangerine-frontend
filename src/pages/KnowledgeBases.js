@@ -15,14 +15,14 @@ import {
 } from '@patternfly/react-core';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
-import AddCircleIcon from "@patternfly/react-icons/dist/esm/icons/add-circle-o-icon";
+import AddCircleIcon from '@patternfly/react-icons/dist/esm/icons/add-circle-o-icon';
 
 const KnowledgeBases = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [knowledgeBaseData, setKnowledgeBaseData] = useState({
     name: '',
-    description: ''
+    description: '',
   });
 
   const navigate = useNavigate();
@@ -50,38 +50,41 @@ const KnowledgeBases = () => {
     const { name, value } = e.target;
     setKnowledgeBaseData({
       ...knowledgeBaseData,
-      [name]: value
+      [name]: value,
     });
   };
 
   const getKnowledgeBases = () => {
-    axios.get('/api/knowledgebases')
-      .then(response => {
+    axios
+      .get('/api/knowledgebases')
+      .then((response) => {
         setData(response.data.data || response.data);
         setLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error fetching knowledge bases:', error);
         setLoading(false);
       });
   };
 
   const addKnowledgeBase = () => {
-    axios.post('/api/knowledgebases', knowledgeBaseData)
+    axios
+      .post('/api/knowledgebases', knowledgeBaseData)
       .then(() => {
         setKnowledgeBaseData({ name: '', description: '' });
         getKnowledgeBases();
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error adding knowledge base:', error);
       });
   };
 
   const deleteKnowledgeBase = (event) => {
     const kbId = event.target.id;
-    axios.delete(`/api/knowledgebases/${kbId}`)
+    axios
+      .delete(`/api/knowledgebases/${kbId}`)
       .then(() => getKnowledgeBases())
-      .catch(error => {
+      .catch((error) => {
         console.error('Error deleting knowledge base:', error);
       });
   };
@@ -93,14 +96,33 @@ const KnowledgeBases = () => {
           {loading ? (
             <p>Loading knowledge bases...</p>
           ) : (
-            <div style={{"width": "90%", "display": "flex", "flexDirection": "column", "marginLeft": "2.5rem"}}>
-              <div style={{"display": "flex", "justifyContent": "end", "paddingTop": "0.5rem"}}>
-                <Button variant="primary" onClick={handleModalToggle} icon={<AddCircleIcon/>}>
+            <div
+              style={{
+                width: '90%',
+                display: 'flex',
+                flexDirection: 'column',
+                marginLeft: '2.5rem',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'end',
+                  paddingTop: '0.5rem',
+                }}
+              >
+                <Button
+                  variant="primary"
+                  onClick={handleModalToggle}
+                  icon={<AddCircleIcon />}
+                >
                   Add Knowledge Base
                 </Button>
               </div>
-              <div style={{"marginTop": "2.5rem"}}>
-                <Title headingLevel="h1" style={{"paddingBottom": "1.5rem"}}>Knowledge Bases</Title>
+              <div style={{ marginTop: '2.5rem' }}>
+                <Title headingLevel="h1" style={{ paddingBottom: '1.5rem' }}>
+                  Knowledge Bases
+                </Title>
                 <Table aria-label="Knowledge bases table">
                   <Thead>
                     <Tr>
@@ -110,20 +132,26 @@ const KnowledgeBases = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {data.map(kb => (
+                    {data.map((kb) => (
                       <Tr key={kb.id}>
-                        <Td><Link to={`/knowledgebases/${kb.id}`}>{kb.name}</Link></Td>
+                        <Td>
+                          <Link to={`/knowledgebases/${kb.id}`}>{kb.name}</Link>
+                        </Td>
                         <Td>{kb.description}</Td>
                         <Td>
-                          <Button 
-                            id={kb.id} 
-                            onClick={() => navigate(`/knowledgebases/${kb.id}`)} 
+                          <Button
+                            id={kb.id}
+                            onClick={() => navigate(`/knowledgebases/${kb.id}`)}
                             variant="secondary"
-                            style={{"marginRight": "0.5rem"}}
+                            style={{ marginRight: '0.5rem' }}
                           >
                             Manage
                           </Button>
-                          <Button id={kb.id} onClick={deleteKnowledgeBase} variant="danger">
+                          <Button
+                            id={kb.id}
+                            onClick={deleteKnowledgeBase}
+                            variant="danger"
+                          >
                             Delete
                           </Button>
                         </Td>
@@ -139,37 +167,44 @@ const KnowledgeBases = () => {
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
                 actions={[
-                  <Button 
-                    key="addkb" 
-                    variant="primary" 
+                  <Button
+                    key="addkb"
+                    variant="primary"
                     onClick={confirmHandler}
-                    isDisabled={!knowledgeBaseData.name.trim() || !knowledgeBaseData.description.trim()}
+                    isDisabled={
+                      !knowledgeBaseData.name.trim() ||
+                      !knowledgeBaseData.description.trim()
+                    }
                   >
                     Confirm
                   </Button>,
-                  <Button key="cancel" variant="link" onClick={handleModalToggle}>
+                  <Button
+                    key="cancel"
+                    variant="link"
+                    onClick={handleModalToggle}
+                  >
                     Cancel
-                  </Button>
+                  </Button>,
                 ]}
               >
                 <Form>
                   <FormGroup>
                     <FormGroup label="Knowledge Base Name" isRequired>
-                      <TextInput 
-                        id="name" 
-                        isRequired 
-                        type="text" 
-                        name="name" 
-                        value={knowledgeBaseData.name} 
+                      <TextInput
+                        id="name"
+                        isRequired
+                        type="text"
+                        name="name"
+                        value={knowledgeBaseData.name}
                         onChange={handleChange}
                       />
                     </FormGroup>
                     <FormGroup label="Description" isRequired>
-                      <TextArea 
-                        id="description" 
-                        isRequired 
-                        name="description" 
-                        value={knowledgeBaseData.description} 
+                      <TextArea
+                        id="description"
+                        isRequired
+                        name="description"
+                        value={knowledgeBaseData.description}
                         onChange={handleChange}
                         autoResize
                         resizeOrientation="vertical"
