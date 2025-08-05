@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -38,16 +38,27 @@ function Chat() {
   };
 
   const handleChatKeyDown = (event) => {
-    if (event.key == 'Enter' && chatInput.length > 0) {
+    if (event.key === 'Enter' && chatInput.length > 0) {
       addMessage('human', chatInput);
       setChatInput('');
       sendChatMessage();
     }
   };
 
+  const getassistantInfo = useCallback(() => {
+    axios
+      .get(`/api/assistants/${assistantId}`)
+      .then((response) => {
+        setassistantInfo(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching assistants:', error);
+      });
+  }, [assistantId]);
+
   useEffect(() => {
     getassistantInfo();
-  }, []);
+  }, [getassistantInfo]);
 
   const vote = (message, upvote, downvote) => {
     return async () => {
@@ -69,17 +80,6 @@ function Chat() {
       });
       console.log(data);
     };
-  };
-
-  const getassistantInfo = () => {
-    axios
-      .get(`/api/assistants/${assistantId}`)
-      .then((response) => {
-        setassistantInfo(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching assistants:', error);
-      });
   };
 
   const interactionHasFeedback = (interactionId) => {

@@ -1,17 +1,9 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  TextContent,
-  Text,
   TextArea,
-  TextVariants,
   Button,
-  List,
-  ListItem,
-  Panel,
-  PanelMain,
-  PanelMainBody,
   Modal,
   ModalVariant,
   Form,
@@ -55,7 +47,6 @@ function Assistant() {
     model: '',
   });
 
-  const [allKnowledgeBases, setAllKnowledgeBases] = useState([]);
   const [availableKBs, setAvailableKBs] = useState([]);
   const [assignedKBs, setAssignedKBs] = useState([]);
   const [isKBModalOpen, setKBModalOpen] = useState(false);
@@ -77,11 +68,7 @@ function Assistant() {
     setKBModalOpen(!isKBModalOpen);
   };
 
-  useEffect(() => {
-    getAssistantInfo();
-  }, []);
-
-  const getAssistantInfo = () => {
+  const getAssistantInfo = useCallback(() => {
     axios
       .get(`/api/assistants/${assistantId}`)
       .then((response) => {
@@ -91,7 +78,11 @@ function Assistant() {
       .catch((error) => {
         console.error('Error fetching assistant:', error);
       });
-  };
+  }, [assistantId]);
+
+  useEffect(() => {
+    getAssistantInfo();
+  }, [getAssistantInfo]);
 
   const loadKnowledgeBasesForSelection = () => {
     // Load all knowledge bases
@@ -99,7 +90,6 @@ function Assistant() {
       .get('/api/knowledgebases')
       .then((response) => {
         const allKBs = response.data.data || response.data;
-        setAllKnowledgeBases(allKBs);
 
         // Load currently assigned knowledge bases
         return axios

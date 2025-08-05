@@ -1,17 +1,11 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  TextContent,
   Text,
   TextArea,
   TextVariants,
   Button,
-  List,
-  ListItem,
-  Panel,
-  PanelMain,
-  PanelMainBody,
   Modal,
   ModalVariant,
   Form,
@@ -49,7 +43,7 @@ function KnowledgeBase() {
   });
   const [currentFiles, setCurrentFiles] = useState([]);
   const [readFileData, setReadFileData] = useState([]);
-  const [pendingUploads, setPendingUploads] = useState(new Set());
+  const [, setPendingUploads] = useState(new Set());
 
   const navigate = useNavigate();
 
@@ -61,11 +55,7 @@ function KnowledgeBase() {
     setModalOpen(!isModalOpen);
   };
 
-  useEffect(() => {
-    getKbInfo();
-  }, []);
-
-  const getKbInfo = () => {
+  const getKbInfo = useCallback(() => {
     axios
       .get(`/api/knowledgebases/${knowledgeBaseId}`)
       .then((response) => {
@@ -76,7 +66,11 @@ function KnowledgeBase() {
       .catch((error) => {
         console.error('Error fetching knowledge base:', error);
       });
-  };
+  }, [knowledgeBaseId]);
+
+  useEffect(() => {
+    getKbInfo();
+  }, [getKbInfo]);
 
   const updateKb = () => {
     const { name, description } = modalKbInfo;
