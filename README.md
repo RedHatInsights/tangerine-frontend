@@ -21,7 +21,7 @@ The frontend provides a UI for managing chat bot assistants, including:
 2. Document upload
 3. Chatting/interacting with an assistant
 
-This project is currently used by Red Hat's Hybrid Cloud Management Engineering Productivity Team. It was born out of a hack-a-thon and is still a work in progress. You will find some areas of code well developed while others are in need of attention and some tweaks to make it production-ready are needed (with that said, the project *is* currently in good enough shape to provide a working chat bot system).
+This project is currently used by Red Hat's Hybrid Cloud Management Engineering Productivity Team. It was born out of a hack-a-thon and is still a work in progress. You will find some areas of code well developed while others are in need of attention and some tweaks to make it production-ready are needed (with that said, the project _is_ currently in good enough shape to provide a working chat bot system).
 
 Currently, the frontend is mostly used for administration purposes or local testing. The document upload interface in the UI is very rudimentary. The backend's S3 sync is the preferred method to configure assistants and indicate which documents should be uploaded.
 
@@ -33,7 +33,7 @@ A development environment can be set up with or without docker compose.
 
 ### With Docker Compose
 
-> **_NOTE:_**  Not supported with Mac, see [Without Docker Compose](#without-docker-compose) below.
+> **_NOTE:_** Not supported with Mac, see [Without Docker Compose](#without-docker-compose) below.
 
 1. First, refer to the backend setup guide [here](https://github.com/RedHatInsights/tangerine-backend#with-docker-compose)
 
@@ -51,14 +51,14 @@ docker compose up --build
 
 2. Once the backend is up and running, install the frontend:
 
-    ```text
-    npm install
-    ```
+   ```text
+   npm install
+   ```
 
 3. Then start a development server:
 
-    ```text
-    npm start
-    ```
+   ```text
+   npm start
+   ```
 
 4. You should then be able to reach the frontend at `http://localhost:3000`
