@@ -4,7 +4,9 @@ import {
   Text,
   TextContent,
   TextVariants,
+  Button,
 } from '@patternfly/react-core';
+import ExternalLinkSquareAltIcon from '@patternfly/react-icons/dist/esm/icons/external-link-square-alt-icon';
 
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -39,15 +41,15 @@ const SearchInfo = ({ searchData }) => {
 
   return (
     searchData.length > 0 &&
-    searchData[0].metadata?.filename && (
+    searchData[0].metadata?.full_path && (
       <ExpandableSection
-        toggleText={isExpanded ? 'Hide search data' : 'Show search data'}
+        toggleText={isExpanded ? 'Hide sources' : 'Show sources'}
         onToggle={onToggle}
         isExpanded={isExpanded}
       >
-        The following files were shown to the LLM.
         {searchData.map((content, index) => {
-          const filename = content.metadata.filename;
+          const title = content.metadata.title;
+          const citation_url = content.metadata.citation_url;
           const pageContent = content.page_content;
 
           return (
@@ -61,12 +63,24 @@ const SearchInfo = ({ searchData }) => {
                   component={TextVariants.h5}
                   style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
                 >
-                  Filename: {filename}
+                  {title}
+                  {citation_url && citation_url !== 'None' && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      icon={<ExternalLinkSquareAltIcon />}
+                      component="a"
+                      href={citation_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Open citation for ${title}`}
+                    />
+                  )}
                 </Text>
               </TextContent>
               <ExpandableSection
                 toggleText={
-                  isSnippetExpanded[index] ? 'Hide snippet' : 'Show snippet'
+                  isSnippetExpanded[index] ? 'Hide content' : 'Show content'
                 }
                 onToggle={() => onSnippetToggle(index)}
                 isExpanded={isSnippetExpanded[index]}

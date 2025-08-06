@@ -27,6 +27,7 @@ import AngleDoubleLeftIcon from '@patternfly/react-icons/dist/esm/icons/angle-do
 import AngleDoubleRightIcon from '@patternfly/react-icons/dist/esm/icons/angle-double-right-icon';
 import AngleRightIcon from '@patternfly/react-icons/dist/esm/icons/angle-right-icon';
 import ExternalLinkSquareAltIcon from '@patternfly/react-icons/dist/esm/icons/external-link-square-alt-icon';
+import ExclamationTriangleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-triangle-icon';
 
 function Assistant() {
   const { assistantId } = useParams();
@@ -72,8 +73,30 @@ function Assistant() {
     axios
       .get(`/api/assistants/${assistantId}`)
       .then((response) => {
-        setAssistantInfo(response.data);
-        setModalAssistantInfo(response.data);
+        const assistantData = response.data;
+
+        // Fetch knowledge base associations
+        return axios
+          .get(`/api/assistants/${assistantId}/knowledgebases`)
+          .then((kbResponse) => {
+            const knowledgebases = kbResponse.data.data || kbResponse.data;
+            const assistantWithKBs = {
+              ...assistantData,
+              knowledgebases: knowledgebases,
+            };
+            setAssistantInfo(assistantWithKBs);
+            setModalAssistantInfo(assistantWithKBs);
+          })
+          .catch((kbError) => {
+            console.error('Error fetching knowledge bases:', kbError);
+            // If KB fetch fails, set empty array
+            const assistantWithKBs = {
+              ...assistantData,
+              knowledgebases: [],
+            };
+            setAssistantInfo(assistantWithKBs);
+            setModalAssistantInfo(assistantWithKBs);
+          });
       })
       .catch((error) => {
         console.error('Error fetching assistant:', error);
@@ -269,6 +292,17 @@ function Assistant() {
                   ))
                 ) : (
                   <SimpleListItem key="no-kb">
+                    {(!assistantInfo.knowledgebases ||
+                      assistantInfo.knowledgebases.length === 0) && (
+                      <ExclamationTriangleIcon
+                        style={{
+                          marginRight: '0.5rem',
+                          color: '#f0ab00',
+                          verticalAlign: 'middle',
+                        }}
+                        title="No knowledge bases associated"
+                      />
+                    )}
                     No knowledge bases associated.
                   </SimpleListItem>
                 )}

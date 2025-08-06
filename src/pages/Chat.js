@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -6,6 +6,12 @@ import {
   Text,
   TextVariants,
   TextInput,
+  Panel,
+  PanelMain,
+  PanelMainBody,
+  PanelFooter,
+  Divider,
+  PanelHeader,
 } from '@patternfly/react-core';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -25,6 +31,7 @@ function Chat() {
   const [interactionsGivenFeedback, setInteractionsGivenFeedback] = useState(
     []
   );
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     // Generate a new session ID when the component mounts
@@ -59,6 +66,10 @@ function Chat() {
   useEffect(() => {
     getassistantInfo();
   }, [getassistantInfo]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const vote = (message, upvote, downvote) => {
     return async () => {
@@ -167,85 +178,72 @@ function Chat() {
         <Text component={TextVariants.p}>{assistantInfo.description}</Text>
         <Text component={TextVariants.p}>Session ID: {sessionId}</Text>
       </TextContent>
-      <div>
-        <div
-          className="pf-v5-c-panel pf-m-scrollable"
-          style={{
-            marginLeft: '10rem',
-            marginRight: '15rem',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-around',
-          }}
-        >
-          <div className="pf-v5-c-panel__main" style={{ minHeight: '70vh' }}>
-            <div className="pf-v5-c-panel__main-body">
-              {messages &&
-                messages.map((message, index) => (
-                  <TextContent key={index} style={{ paddingBottom: '1rem' }}>
-                    <Text component={TextVariants.h3}>
-                      {message.sender === 'ai'
-                        ? assistantInfo.name
-                        : message.sender}
-                    </Text>
-                    <Text component={TextVariants.small}>
-                      {message.sender === 'ai'
-                        ? `Interaction ID: ${message.interactionId}`
-                        : ''}
-                    </Text>
-                    {/* do not format as markdown until text content streaming is finished */}
-                    {message.done ? (
-                      <Markdown remarkPlugins={[remarkGfm]}>
-                        {message.text}
-                      </Markdown>
-                    ) : (
-                      <Text>{message.text}</Text>
+      <Panel
+        isScrollable
+        variant="raised"
+        style={{
+          marginLeft: '10rem',
+          marginRight: '15rem',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-around',
+        }}
+      >
+        <PanelMain style={{ minHeight: '50vh', maxHeight: '50vh' }}>
+          <PanelMainBody>
+            {messages &&
+              messages.map((message, index) => (
+                <TextContent key={index} style={{ paddingBottom: '1rem' }}>
+                  <Text component={TextVariants.h3}>
+                    {message.sender === 'ai'
+                      ? assistantInfo.name
+                      : message.sender}
+                  </Text>
+                  <Text component={TextVariants.small}>
+                    {message.sender === 'ai'
+                      ? `Interaction ID: ${message.interactionId}`
+                      : ''}
+                  </Text>
+                  <Markdown remarkPlugins={[remarkGfm]}>
+                    {message.text}
+                  </Markdown>
+                  {message.done && message.search_metadata && (
+                    <SearchInfo searchData={message.search_metadata} />
+                  )}
+                  {message.done &&
+                    !interactionHasFeedback(message.interactionId) && (
+                      <React.Fragment>
+                        <Button size="sm" onClick={vote(message, true, false)}>
+                          Upvote
+                        </Button>
+                        <Button size="sm" onClick={vote(message, false, true)}>
+                          Downvote
+                        </Button>
+                      </React.Fragment>
                     )}
-                    {message.sender === 'ai' && message.search_metadata && (
-                      <SearchInfo searchData={message.search_metadata} />
+                  {message.done &&
+                    interactionHasFeedback(message.interactionId) && (
+                      <Text component={TextVariants.small}>
+                        Thank you for your feedback!
+                      </Text>
                     )}
-                    {message.sender === 'ai' &&
-                      message.done &&
-                      !interactionHasFeedback(message.interactionId) && (
-                        <React.Fragment>
-                          <Button
-                            size="sm"
-                            onClick={vote(message, true, false)}
-                          >
-                            Upvote
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={vote(message, false, true)}
-                          >
-                            Downvote
-                          </Button>
-                        </React.Fragment>
-                      )}
-                    {message.sender === 'ai' &&
-                      message.done &&
-                      interactionHasFeedback(message.interactionId) && (
-                        <Text component={TextVariants.small}>
-                          Thank you for your feedback!
-                        </Text>
-                      )}
-                  </TextContent>
-                ))}
-            </div>
-          </div>
-          <div className="pf-v5-c-panel__footer" style={{ width: '100%' }}>
-            <TextInput
-              type="text"
-              value={chatInput}
-              id="assistant-chat-input"
-              name="assistant-chat-input"
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={handleChatKeyDown}
-              placeholder="Write a message to the assistant. Press ENTER to send..."
-            />
-          </div>
-        </div>
-      </div>
+                </TextContent>
+              ))}
+            <div ref={messagesEndRef} />
+          </PanelMainBody>
+        </PanelMain>
+        <PanelFooter>
+          <TextInput
+            type="text"
+            value={chatInput}
+            id="assistant-chat-input"
+            name="assistant-chat-input"
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={handleChatKeyDown}
+            placeholder="Write a message to the assistant. Press ENTER to send..."
+          />
+        </PanelFooter>
+      </Panel>
     </>
   );
 }

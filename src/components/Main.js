@@ -17,6 +17,7 @@ import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
 
 import AddCircleIcon from '@patternfly/react-icons/dist/esm/icons/add-circle-o-icon';
+import ExclamationTriangleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-triangle-icon';
 
 const Main = () => {
   const [data, setData] = useState('');
@@ -84,8 +85,38 @@ const Main = () => {
     axios
       .get('/api/assistants')
       .then((response) => {
-        setData(response.data.data);
-        setLoading(false);
+        const assistants = response.data.data;
+
+        // Fetch knowledge base count for each assistant
+        const assistantPromises = assistants.map((assistant) =>
+          axios
+            .get(`/api/assistants/${assistant.id}/knowledgebases`)
+            .then((kbResponse) => ({
+              ...assistant,
+              knowledgebases: kbResponse.data.data || kbResponse.data,
+            }))
+            .catch((error) => {
+              console.error(
+                `Error fetching KBs for assistant ${assistant.id}:`,
+                error
+              );
+              return {
+                ...assistant,
+                knowledgebases: [],
+              };
+            })
+        );
+
+        Promise.all(assistantPromises)
+          .then((assistantsWithKBs) => {
+            setData(assistantsWithKBs);
+            setLoading(false);
+          })
+          .catch((error) => {
+            console.error('Error fetching assistant knowledge bases:', error);
+            setData(assistants);
+            setLoading(false);
+          });
       })
       .catch((error) => {
         console.error('Error fetching assistants:', error);
@@ -157,6 +188,7 @@ const Main = () => {
                     <Tr>
                       <Th>Name</Th>
                       <Th>Description</Th>
+                      <Th>Knowledge Bases</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -168,6 +200,20 @@ const Main = () => {
                           </Link>
                         </Td>
                         <Td>{assistant.description}</Td>
+                        <Td>
+                          {assistant.knowledgebases &&
+                          assistant.knowledgebases.length > 0 ? (
+                            assistant.knowledgebases.length
+                          ) : (
+                            <ExclamationTriangleIcon
+                              style={{
+                                color: '#f0ab00',
+                                verticalAlign: 'middle',
+                              }}
+                              title="No knowledge bases associated"
+                            />
+                          )}
+                        </Td>
                         <Td>
                           <Button
                             id={assistant.id}
