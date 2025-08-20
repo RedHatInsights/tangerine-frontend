@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.32.0
+    hooks:
+      - id: eslint
+        files: '\.(js|jsx|ts|tsx)$'
+        types: [file]
+        additional_dependencies:
+          - 'eslint@8.56.0'
+          - 'eslint-config-react-app@^7.0.0'
+          - '@typescript-eslint/eslint-plugin@^5.0.0'
+          - '@typescript-eslint/parser@^5.0.0'
+        args: ['--fix']
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: prettier --write
+        language: node
+        files: '\.(js|jsx|ts|tsx|json|css|scss|md)$'
+        additional_dependencies: [prettier@^3.0.0]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-json
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: jest-test
+        name: jest test
+        entry: npm test --
+        language: system
+        pass_filenames: false
+        files: '\.(js|jsx|ts|tsx)$'
+        args: ['--watchAll=false', '--passWithNoTests', '--ci']
