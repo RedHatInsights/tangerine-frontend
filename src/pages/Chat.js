@@ -207,7 +207,7 @@ function Chat() {
                   <Markdown remarkPlugins={[remarkGfm]}>
                     {message.text}
                   </Markdown>
-                  {message.done && message.search_metadata && (
+                  {message.sender === 'ai' && message.done && message.search_metadata && (
                     <SearchInfo searchData={message.search_metadata} />
                   )}
                   {message.done &&
