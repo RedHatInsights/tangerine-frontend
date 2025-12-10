@@ -3,8 +3,6 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import {
   Content,
-  Text,
-  TextVariants,
   TextInput,
   Panel,
   PanelMain,
@@ -174,9 +172,9 @@ function Chat() {
           paddingBottom: '2rem',
         }}
       >
-        <Text component={TextVariants.h1}>Chat with {assistantInfo.name}</Text>
-        <Text component={TextVariants.p}>{assistantInfo.description}</Text>
-        <Text component={TextVariants.p}>Session ID: {sessionId}</Text>
+        <h1>Chat with {assistantInfo.name}</h1>
+        <p>{assistantInfo.description}</p>
+        <p>Session ID: {sessionId}</p>
       </Content>
       <Panel
         isScrollable
@@ -194,16 +192,16 @@ function Chat() {
             {messages &&
               messages.map((message, index) => (
                 <Content key={index} style={{ paddingBottom: '1rem' }}>
-                  <Text component={TextVariants.h3}>
+                  <h3>
                     {message.sender === 'ai'
                       ? assistantInfo.name
                       : message.sender}
-                  </Text>
-                  <Text component={TextVariants.small}>
+                  </h3>
+                  <small>
                     {message.sender === 'ai'
                       ? `Interaction ID: ${message.interactionId}`
                       : ''}
-                  </Text>
+                  </small>
                   <Markdown remarkPlugins={[remarkGfm]}>
                     {message.text}
                   </Markdown>
@@ -225,9 +223,7 @@ function Chat() {
                     )}
                   {message.done &&
                     interactionHasFeedback(message.interactionId) && (
-                      <Text component={TextVariants.small}>
-                        Thank you for your feedback!
-                      </Text>
+                      <small>Thank you for your feedback!</small>
                     )}
                 </Content>
               ))}

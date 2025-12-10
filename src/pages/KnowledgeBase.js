@@ -2,9 +2,7 @@ import axios from 'axios';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  Text,
   TextArea,
-  TextVariants,
   Button,
   Modal,
   ModalVariant,
@@ -337,17 +335,12 @@ function KnowledgeBase() {
 
                 return (
                   <div>
-                    <Text
-                      component={TextVariants.small}
-                      style={{ marginBottom: '1rem', display: 'block' }}
-                    >
+                    <small style={{ marginBottom: '1rem', display: 'block' }}>
                       Total: {activeFiles.length} active, {inactiveFiles.length}{' '}
                       inactive, {pendingRemovalFiles.length} pending removal
-                    </Text>
+                    </small>
                     {activeFiles.length === 0 ? (
-                      <Text component={TextVariants.p}>
-                        No active documents.
-                      </Text>
+                      <p>No active documents.</p>
                     ) : (
                       <SimpleList>
                         {activeFiles.map((file) => (
@@ -360,16 +353,13 @@ function KnowledgeBase() {
                               }}
                             >
                               <div style={{ flex: 1 }}>
-                                <Text
-                                  component={TextVariants.small}
-                                  style={{ fontWeight: 'bold' }}
-                                >
+                                <small style={{ fontWeight: 'bold' }}>
                                   {file.title}
-                                </Text>
+                                </small>
                                 <br />
-                                <Text component={TextVariants.small}>
+                                <small>
                                   Source: {file.source} | Path: {file.full_path}
-                                </Text>
+                                </small>
                               </div>
                               {file.citation_url &&
                                 file.citation_url !== 'None' && (

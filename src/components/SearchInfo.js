@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  ExpandableSection,
-  Text,
-  Content,
-  TextVariants,
-  Button,
-} from '@patternfly/react-core';
+import { ExpandableSection, Content, Button } from '@patternfly/react-core';
 import ExternalLinkSquareAltIcon from '@patternfly/react-icons/dist/esm/icons/external-link-square-alt-icon';
 
 import Markdown from 'react-markdown';
@@ -59,10 +53,7 @@ const SearchInfo = ({ searchData }) => {
               style={{ marginLeft: '0.5rem' }}
             >
               <Content>
-                <Text
-                  component={TextVariants.h5}
-                  style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
-                >
+                <h5 style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
                   {title}
                   {citation_url && citation_url !== 'None' && (
                     <Button
@@ -76,7 +67,7 @@ const SearchInfo = ({ searchData }) => {
                       aria-label={`Open citation for ${title}`}
                     />
                   )}
-                </Text>
+                </h5>
               </Content>
               <ExpandableSection
                 toggleText={
