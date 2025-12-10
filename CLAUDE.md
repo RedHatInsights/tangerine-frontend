@@ -243,8 +243,10 @@ done
 
 - **Conflict resolution strategy**: When in doubt, choose the newer/higher version of dependencies
 - **Package lock regeneration**: Always run `npm install` after combining multiple PRs to ensure consistency
+- **TypeScript compatibility**: `react-scripts@5.0.1` only supports TypeScript ^3.2.1 || ^4. Do NOT upgrade to TypeScript 5 until react-scripts is upgraded to a compatible version
 - **Peer dependency warnings**: Major version updates (React 19, PatternFly 6, etc.) may cause peer dependency warnings - these are expected during transitions
 - **Testing**: For major version updates, test the application locally before merging
+- **Verify npm install**: After combining PRs, run `npm install` to ensure there are no peer dependency conflicts that would break the build
 - **Admin flag**: The `--admin` flag bypasses branch protection rules - use only for automated dependency updates
 - **Timing**: Some PRs need a few seconds after pushing before GitHub recognizes them as mergeable
 - **Breaking changes**: Major version updates may require code changes - document these in the PR description
