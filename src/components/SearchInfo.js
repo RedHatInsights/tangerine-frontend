@@ -2,7 +2,7 @@ import React from 'react';
 import {
   ExpandableSection,
   Text,
-  TextContent,
+  Content,
   TextVariants,
   Button,
 } from '@patternfly/react-core';
@@ -58,7 +58,7 @@ const SearchInfo = ({ searchData }) => {
               className="search-metadata"
               style={{ marginLeft: '0.5rem' }}
             >
-              <TextContent>
+              <Content>
                 <Text
                   component={TextVariants.h5}
                   style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
@@ -77,7 +77,7 @@ const SearchInfo = ({ searchData }) => {
                     />
                   )}
                 </Text>
-              </TextContent>
+              </Content>
               <ExpandableSection
                 toggleText={
                   isSnippetExpanded[index] ? 'Hide content' : 'Show content'

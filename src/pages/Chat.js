@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import {
-  TextContent,
+  Content,
   Text,
   TextVariants,
   TextInput,
@@ -167,7 +167,7 @@ function Chat() {
 
   return (
     <>
-      <TextContent
+      <Content
         style={{
           marginLeft: '10rem',
           paddingTop: '2rem',
@@ -177,7 +177,7 @@ function Chat() {
         <Text component={TextVariants.h1}>Chat with {assistantInfo.name}</Text>
         <Text component={TextVariants.p}>{assistantInfo.description}</Text>
         <Text component={TextVariants.p}>Session ID: {sessionId}</Text>
-      </TextContent>
+      </Content>
       <Panel
         isScrollable
         variant="raised"
@@ -193,7 +193,7 @@ function Chat() {
           <PanelMainBody>
             {messages &&
               messages.map((message, index) => (
-                <TextContent key={index} style={{ paddingBottom: '1rem' }}>
+                <Content key={index} style={{ paddingBottom: '1rem' }}>
                   <Text component={TextVariants.h3}>
                     {message.sender === 'ai'
                       ? assistantInfo.name
@@ -207,9 +207,11 @@ function Chat() {
                   <Markdown remarkPlugins={[remarkGfm]}>
                     {message.text}
                   </Markdown>
-                  {message.sender === 'ai' && message.done && message.search_metadata && (
-                    <SearchInfo searchData={message.search_metadata} />
-                  )}
+                  {message.sender === 'ai' &&
+                    message.done &&
+                    message.search_metadata && (
+                      <SearchInfo searchData={message.search_metadata} />
+                    )}
                   {message.done &&
                     !interactionHasFeedback(message.interactionId) && (
                       <React.Fragment>
@@ -227,7 +229,7 @@ function Chat() {
                         Thank you for your feedback!
                       </Text>
                     )}
-                </TextContent>
+                </Content>
               ))}
             <div ref={messagesEndRef} />
           </PanelMainBody>

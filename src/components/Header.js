@@ -5,7 +5,7 @@ import {
   MastheadBrand,
   MastheadContent,
   Button,
-  TextContent,
+  Content,
   Text,
   TextVariants,
 } from '@patternfly/react-core';
@@ -29,23 +29,23 @@ const Header = () => {
           onClick={() => navigate('/')}
           style={{ marginRight: '1rem' }}
         >
-          <TextContent style={{ color: 'black' }}>
+          <Content style={{ color: 'black' }}>
             <Text component={TextVariants.h3}>Tangerine</Text>
-          </TextContent>
+          </Content>
         </Button>
         <Button
           variant="plain"
           onClick={() => navigate('/')}
           style={{ marginRight: '1rem' }}
         >
-          <TextContent style={{ color: 'black' }}>
+          <Content style={{ color: 'black' }}>
             <Text component={TextVariants.h4}>Assistants</Text>
-          </TextContent>
+          </Content>
         </Button>
         <Button variant="plain" onClick={() => navigate('/knowledgebases')}>
-          <TextContent style={{ color: 'black' }}>
+          <Content style={{ color: 'black' }}>
             <Text component={TextVariants.h4}>Knowledge Bases</Text>
-          </TextContent>
+          </Content>
         </Button>
       </MastheadContent>
     </Masthead>
