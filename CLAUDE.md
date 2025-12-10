@@ -85,3 +85,166 @@ Uses PatternFly React components throughout:
 - No global state management (Redux, Context, etc.)
 - Real-time updates through streaming API responses
 - Feedback tracking for chat interactions
+
+## Managing Red Hat Konflux Dependency Updates
+
+The `red-hat-konflux` bot regularly opens PRs to update npm dependencies. These PRs typically update `package.json` and `package-lock.json`.
+
+### Strategy 1: Merge Individual PRs (Preferred for Small Batches)
+
+When there are only a few open konflux PRs, use the `gh` CLI to merge them with admin privileges:
+
+```bash
+# List all open konflux PRs
+gh pr list --author "app/red-hat-konflux" --json number,title,mergeable,state --state open
+
+# Merge PRs that are mergeable
+for pr in 61 62 63; do
+  gh pr merge $pr --squash --delete-branch --admin
+done
+```
+
+**Note**: PRs that are behind the base branch or have conflicts will fail to merge and need conflict resolution.
+
+### Strategy 2: Combine into Single PR (For Large Batches)
+
+When there are 15+ open konflux PRs, combine them into a single PR:
+
+1. **Create a combined branch**:
+
+   ```bash
+   git checkout -b combined-konflux-dependency-updates
+   ```
+
+2. **Fetch all remote branches**:
+
+   ```bash
+   git fetch origin
+   ```
+
+3. **Get list of branch names from PRs**:
+
+   ```bash
+   gh pr list --author "app/red-hat-konflux" --json number,headRefName,title --state open
+   ```
+
+4. **Merge all konflux branches sequentially (oldest to newest)**:
+
+   ```bash
+   # Merge each branch - conflicts are expected
+   git merge --no-edit origin/konflux/references/main
+   git merge --no-edit origin/konflux/mintmaker/main/pre-commit-mirrors-eslint-9.x
+   # ... continue with remaining branches
+   ```
+
+5. **Resolve merge conflicts**:
+   - **For `package.json`**: Choose the newer/higher version of each dependency
+   - **For `package-lock.json`**: Use `git checkout --theirs package-lock.json` to take the incoming version
+   - **After resolving conflicts**:
+     ```bash
+     git add package.json package-lock.json
+     git commit -m "Merge PR #XX and resolve conflicts - <description>"
+     ```
+   - **Pattern**: When choosing between versions, always use the higher version number
+
+6. **Regenerate package-lock.json after all merges**:
+
+   ```bash
+   npm install
+   git add package-lock.json
+   git commit -m "Regenerate package-lock.json after merging all updates"
+   ```
+
+7. **Push and create PR**:
+
+   ```bash
+   git push -u origin combined-konflux-dependency-updates
+   gh pr create --title "chore(deps): Combined dependency updates from red-hat-konflux" --body "<detailed summary>"
+   ```
+
+8. **Wait for individual PRs to auto-close**:
+   - After the combined PR is merged, wait ~1 minute
+   - GitHub will automatically close most/all of the individual konflux PRs since their changes are now in main
+   - Check if any PRs remain open: `gh pr list --author "app/red-hat-konflux" --state open`
+   - Only manually close PRs that didn't auto-close:
+     ```bash
+     gh pr close <pr-number> --comment "Closing - changes included in combined PR #<combined-pr-number>"
+     ```
+
+### Handling Merge Conflicts in Konflux PRs
+
+When PRs have conflicts (typically after other PRs have been merged):
+
+1. **Checkout the PR branch**:
+
+   ```bash
+   gh pr checkout <pr-number>
+   ```
+
+2. **Merge main into the PR branch**:
+
+   ```bash
+   git merge origin/main
+   ```
+
+3. **Resolve conflicts**:
+   - **For `package.json`**: Choose the newer version of each dependency
+   - **For `package-lock.json`**: Use `git checkout --theirs package-lock.json` to take main's version
+   - **Pattern**: When choosing between versions, use the higher version number
+
+4. **Commit and push**:
+
+   ```bash
+   git add package.json package-lock.json
+   git commit -m "Merge main into PR #<pr-number> and resolve conflicts"
+   git push origin <branch-name>
+   ```
+
+5. **Wait a few seconds, then merge**:
+   ```bash
+   sleep 3
+   gh pr merge <pr-number> --squash --delete-branch --admin
+   ```
+
+### Workflow for Batch Merging Conflicted PRs
+
+When multiple PRs have conflicts, resolve them **in order from oldest to newest**:
+
+```bash
+# Work through PRs sequentially (oldest first)
+for pr in 61 62 63 64 65; do
+  echo "Processing PR #$pr"
+
+  # Update local main
+  git checkout main && git pull origin main
+
+  # Checkout PR and merge main
+  gh pr checkout $pr
+  git merge origin/main
+
+  # Resolve conflicts (manual step)
+  # Edit package.json to choose newer versions
+  git checkout --theirs package-lock.json
+
+  # Commit and push
+  git add package.json package-lock.json
+  git commit -m "Merge main into PR #$pr and resolve conflicts"
+  git push origin <branch-name>
+
+  # Merge the PR
+  sleep 3
+  gh pr merge $pr --squash --delete-branch --admin
+done
+```
+
+**Why oldest first?**: Earlier PRs may update dependencies that later PRs also touch. Merging in order minimizes cascading conflicts.
+
+### Important Considerations
+
+- **Conflict resolution strategy**: When in doubt, choose the newer/higher version of dependencies
+- **Package lock regeneration**: Always run `npm install` after combining multiple PRs to ensure consistency
+- **Peer dependency warnings**: Major version updates (React 19, PatternFly 6, etc.) may cause peer dependency warnings - these are expected during transitions
+- **Testing**: For major version updates, test the application locally before merging
+- **Admin flag**: The `--admin` flag bypasses branch protection rules - use only for automated dependency updates
+- **Timing**: Some PRs need a few seconds after pushing before GitHub recognizes them as mergeable
+- **Breaking changes**: Major version updates may require code changes - document these in the PR description
