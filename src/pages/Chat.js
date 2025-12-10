@@ -8,8 +8,6 @@ import {
   PanelMain,
   PanelMainBody,
   PanelFooter,
-  Divider,
-  PanelHeader,
 } from '@patternfly/react-core';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
