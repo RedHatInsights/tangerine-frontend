@@ -5,9 +5,7 @@ import {
   MastheadBrand,
   MastheadContent,
   Button,
-  TextContent,
-  Text,
-  TextVariants,
+  Content,
 } from '@patternfly/react-core';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,23 +27,23 @@ const Header = () => {
           onClick={() => navigate('/')}
           style={{ marginRight: '1rem' }}
         >
-          <TextContent style={{ color: 'black' }}>
-            <Text component={TextVariants.h3}>Tangerine</Text>
-          </TextContent>
+          <Content style={{ color: 'black' }}>
+            <h3>Tangerine</h3>
+          </Content>
         </Button>
         <Button
           variant="plain"
           onClick={() => navigate('/')}
           style={{ marginRight: '1rem' }}
         >
-          <TextContent style={{ color: 'black' }}>
-            <Text component={TextVariants.h4}>Assistants</Text>
-          </TextContent>
+          <Content style={{ color: 'black' }}>
+            <h4>Assistants</h4>
+          </Content>
         </Button>
         <Button variant="plain" onClick={() => navigate('/knowledgebases')}>
-          <TextContent style={{ color: 'black' }}>
-            <Text component={TextVariants.h4}>Knowledge Bases</Text>
-          </TextContent>
+          <Content style={{ color: 'black' }}>
+            <h4>Knowledge Bases</h4>
+          </Content>
         </Button>
       </MastheadContent>
     </Masthead>

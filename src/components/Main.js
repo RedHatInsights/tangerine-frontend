@@ -11,7 +11,9 @@ import {
   PanelMainBody,
   Title,
   Modal,
-  ModalVariant,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from '@patternfly/react-core';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
@@ -251,82 +253,89 @@ const Main = () => {
                 </Table>
               </div>
               <Modal
-                variant={ModalVariant.medium}
-                title="Create a new assistant"
-                description="Enter the information below to create a new assistant."
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                footer={
-                  defaultsLoading ? <p>Loading assistant defaults...</p> : null
-                }
-                actions={[
+                aria-labelledby="create-assistant-modal-title"
+                aria-describedby="create-assistant-modal-description"
+              >
+                <ModalHeader
+                  title="Create a new assistant"
+                  labelId="create-assistant-modal-title"
+                  description="Enter the information below to create a new assistant."
+                />
+                <ModalBody id="create-assistant-modal-description">
+                  {defaultsLoading ? (
+                    <p>Loading assistant defaults...</p>
+                  ) : (
+                    <Form>
+                      <FormGroup>
+                        <FormGroup label="Assistant Name" isRequired>
+                          <TextInput
+                            id="name"
+                            isRequired
+                            type="text"
+                            name="name"
+                            value={assistantData.name}
+                            onChange={handleChange}
+                          />
+                        </FormGroup>
+
+                        <FormGroup label="Assistant Description" isRequired>
+                          <TextInput
+                            id="description"
+                            isRequired
+                            type="text"
+                            name="description"
+                            value={assistantData.description}
+                            onChange={handleChange}
+                          />
+                        </FormGroup>
+
+                        <FormGroup label="Model (leave blank for default)">
+                          <TextInput
+                            id="model"
+                            type="text"
+                            name="model"
+                            value={assistantData.model}
+                            onChange={handleChange}
+                          />
+                        </FormGroup>
+
+                        <FormGroup label="System Prompt" isRequired>
+                          <TextArea
+                            id="prompt"
+                            isRequired
+                            autoResize
+                            resizeOrientation="vertical"
+                            type="text"
+                            name="system_prompt"
+                            value={assistantData.system_prompt}
+                            onChange={handleChange}
+                            style={{ fontFamily: 'monospace' }}
+                          />
+                        </FormGroup>
+                      </FormGroup>
+                    </Form>
+                  )}
+                </ModalBody>
+                <ModalFooter>
                   <Button
                     key="addassistant"
                     variant="primary"
                     form="add-assistant-button"
                     onClick={confirmHandler}
-                    isDisabled={!isFormValid()}
+                    isDisabled={!isFormValid() || defaultsLoading}
                   >
                     Confirm
-                  </Button>,
+                  </Button>
                   <Button
                     key="cancel"
                     variant="link"
                     onClick={handleModalToggle}
                   >
                     Cancel
-                  </Button>,
-                ]}
-              >
-                <Form>
-                  <FormGroup>
-                    <FormGroup label="Assistant Name" isRequired>
-                      <TextInput
-                        id="name"
-                        isRequired
-                        type="text"
-                        name="name"
-                        value={assistantData.name}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-
-                    <FormGroup label="Assistant Description" isRequired>
-                      <TextInput
-                        id="description"
-                        isRequired
-                        type="text"
-                        name="description"
-                        value={assistantData.description}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-
-                    <FormGroup label="Model (leave blank for default)">
-                      <TextInput
-                        id="model"
-                        type="text"
-                        name="model"
-                        value={assistantData.model}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-
-                    <FormGroup label="System Prompt" isRequired>
-                      <TextArea
-                        id="prompt"
-                        isRequired
-                        autoResize
-                        resizeOrientation="vertical"
-                        type="text"
-                        name="system_prompt"
-                        value={assistantData.system_prompt}
-                        onChange={handleChange}
-                        style={{ fontFamily: 'monospace' }}
-                      />
-                    </FormGroup>
-                  </FormGroup>
-                </Form>
+                  </Button>
+                </ModalFooter>
               </Modal>
             </div>
           )}

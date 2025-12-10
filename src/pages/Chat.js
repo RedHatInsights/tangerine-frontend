@@ -2,16 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import {
-  TextContent,
-  Text,
-  TextVariants,
+  Content,
   TextInput,
   Panel,
   PanelMain,
   PanelMainBody,
   PanelFooter,
-  Divider,
-  PanelHeader,
 } from '@patternfly/react-core';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -167,17 +163,17 @@ function Chat() {
 
   return (
     <>
-      <TextContent
+      <Content
         style={{
           marginLeft: '10rem',
           paddingTop: '2rem',
           paddingBottom: '2rem',
         }}
       >
-        <Text component={TextVariants.h1}>Chat with {assistantInfo.name}</Text>
-        <Text component={TextVariants.p}>{assistantInfo.description}</Text>
-        <Text component={TextVariants.p}>Session ID: {sessionId}</Text>
-      </TextContent>
+        <h1>Chat with {assistantInfo.name}</h1>
+        <p>{assistantInfo.description}</p>
+        <p>Session ID: {sessionId}</p>
+      </Content>
       <Panel
         isScrollable
         variant="raised"
@@ -193,23 +189,25 @@ function Chat() {
           <PanelMainBody>
             {messages &&
               messages.map((message, index) => (
-                <TextContent key={index} style={{ paddingBottom: '1rem' }}>
-                  <Text component={TextVariants.h3}>
+                <Content key={index} style={{ paddingBottom: '1rem' }}>
+                  <h3>
                     {message.sender === 'ai'
                       ? assistantInfo.name
                       : message.sender}
-                  </Text>
-                  <Text component={TextVariants.small}>
+                  </h3>
+                  <small>
                     {message.sender === 'ai'
                       ? `Interaction ID: ${message.interactionId}`
                       : ''}
-                  </Text>
+                  </small>
                   <Markdown remarkPlugins={[remarkGfm]}>
                     {message.text}
                   </Markdown>
-                  {message.sender === 'ai' && message.done && message.search_metadata && (
-                    <SearchInfo searchData={message.search_metadata} />
-                  )}
+                  {message.sender === 'ai' &&
+                    message.done &&
+                    message.search_metadata && (
+                      <SearchInfo searchData={message.search_metadata} />
+                    )}
                   {message.done &&
                     !interactionHasFeedback(message.interactionId) && (
                       <React.Fragment>
@@ -223,11 +221,9 @@ function Chat() {
                     )}
                   {message.done &&
                     interactionHasFeedback(message.interactionId) && (
-                      <Text component={TextVariants.small}>
-                        Thank you for your feedback!
-                      </Text>
+                      <small>Thank you for your feedback!</small>
                     )}
-                </TextContent>
+                </Content>
               ))}
             <div ref={messagesEndRef} />
           </PanelMainBody>
