@@ -5,7 +5,9 @@ import {
   TextArea,
   Button,
   Modal,
-  ModalVariant,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Form,
   FormGroup,
   TextInput,
@@ -435,46 +437,52 @@ function KnowledgeBase() {
         </MultipleFileUpload>
       </div>
       <Modal
-        variant={ModalVariant.small}
-        title="Update knowledge base"
-        description="Modify the information below to update the knowledge base."
         isOpen={isModalOpen}
         onClose={handleModalToggle}
-        actions={[
+        aria-labelledby="update-kb-modal-title"
+        aria-describedby="update-kb-modal-description"
+      >
+        <ModalHeader
+          title="Update knowledge base"
+          labelId="update-kb-modal-title"
+          description="Modify the information below to update the knowledge base."
+        />
+        <ModalBody id="update-kb-modal-description">
+          <Form>
+            <FormGroup>
+              <FormGroup label="Knowledge Base Name" isRequired>
+                <TextInput
+                  id="name"
+                  isRequired
+                  type="text"
+                  name="name"
+                  value={modalKbInfo.name}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup label="Description" isRequired>
+                <TextArea
+                  id="description"
+                  isRequired
+                  name="description"
+                  value={modalKbInfo.description}
+                  onChange={handleChange}
+                  autoResize
+                  resizeOrientation="vertical"
+                />
+              </FormGroup>
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
           <Button key="updatekb" variant="primary" onClick={confirmHandler}>
             Confirm
-          </Button>,
+          </Button>
           <Button key="cancel" variant="link" onClick={handleModalToggle}>
             Cancel
-          </Button>,
-        ]}
-      >
-        <Form>
-          <FormGroup>
-            <FormGroup label="Knowledge Base Name" isRequired>
-              <TextInput
-                id="name"
-                isRequired
-                type="text"
-                name="name"
-                value={modalKbInfo.name}
-                onChange={handleChange}
-              />
-            </FormGroup>
-
-            <FormGroup label="Description" isRequired>
-              <TextArea
-                id="description"
-                isRequired
-                name="description"
-                value={modalKbInfo.description}
-                onChange={handleChange}
-                autoResize
-                resizeOrientation="vertical"
-              />
-            </FormGroup>
-          </FormGroup>
-        </Form>
+          </Button>
+        </ModalFooter>
       </Modal>
     </div>
   );

@@ -5,7 +5,9 @@ import {
   TextArea,
   Button,
   Modal,
-  ModalVariant,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Form,
   FormGroup,
   TextInput,
@@ -372,12 +374,68 @@ function Assistant() {
 
       {/* Assistant Info Modal */}
       <Modal
-        variant={ModalVariant.small}
-        title="Update assistant"
-        description="Modify the information below to update the assistant."
         isOpen={isModalOpen}
         onClose={handleModalToggle}
-        actions={[
+        aria-labelledby="update-assistant-modal-title"
+        aria-describedby="update-assistant-modal-description"
+      >
+        <ModalHeader
+          title="Update assistant"
+          labelId="update-assistant-modal-title"
+          description="Modify the information below to update the assistant."
+        />
+        <ModalBody id="update-assistant-modal-description">
+          <Form>
+            <FormGroup>
+              <FormGroup label="Assistant Name" isRequired>
+                <TextInput
+                  id="name"
+                  isRequired
+                  type="text"
+                  name="name"
+                  value={modalAssistantInfo.name}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup label="Assistant Description" isRequired>
+                <TextInput
+                  id="description"
+                  isRequired
+                  type="text"
+                  name="description"
+                  value={modalAssistantInfo.description}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup label="Model (leave blank for default)">
+                <TextInput
+                  id="model"
+                  type="text"
+                  name="model"
+                  value={modalAssistantInfo.model}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+
+              <FormGroup label="System Prompt" isRequired>
+                <TextArea
+                  id="prompt"
+                  isRequired
+                  autoResize
+                  resizeOrientation="vertical"
+                  type="text"
+                  name="system_prompt"
+                  value={modalAssistantInfo.system_prompt}
+                  onChange={handleChange}
+                  style={{ fontFamily: 'monospace' }}
+                />
+              </FormGroup>
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
           <Button
             key="updateassistant"
             variant="primary"
@@ -385,156 +443,112 @@ function Assistant() {
             isDisabled={!isFormValid()}
           >
             Confirm
-          </Button>,
+          </Button>
           <Button key="cancel" variant="link" onClick={handleModalToggle}>
             Cancel
-          </Button>,
-        ]}
-      >
-        <Form>
-          <FormGroup>
-            <FormGroup label="Assistant Name" isRequired>
-              <TextInput
-                id="name"
-                isRequired
-                type="text"
-                name="name"
-                value={modalAssistantInfo.name}
-                onChange={handleChange}
-              />
-            </FormGroup>
-
-            <FormGroup label="Assistant Description" isRequired>
-              <TextInput
-                id="description"
-                isRequired
-                type="text"
-                name="description"
-                value={modalAssistantInfo.description}
-                onChange={handleChange}
-              />
-            </FormGroup>
-
-            <FormGroup label="Model (leave blank for default)">
-              <TextInput
-                id="model"
-                type="text"
-                name="model"
-                value={modalAssistantInfo.model}
-                onChange={handleChange}
-              />
-            </FormGroup>
-
-            <FormGroup label="System Prompt" isRequired>
-              <TextArea
-                id="prompt"
-                isRequired
-                autoResize
-                resizeOrientation="vertical"
-                type="text"
-                name="system_prompt"
-                value={modalAssistantInfo.system_prompt}
-                onChange={handleChange}
-                style={{ fontFamily: 'monospace' }}
-              />
-            </FormGroup>
-          </FormGroup>
-        </Form>
+          </Button>
+        </ModalFooter>
       </Modal>
 
       {/* Knowledge Base Assignment Modal */}
       <Modal
-        variant={ModalVariant.large}
-        title="Manage Knowledge Base Associations"
-        description="Select which knowledge bases this assistant should have access to."
         isOpen={isKBModalOpen}
         onClose={handleKBModalToggle}
-        actions={[
+        aria-labelledby="manage-kb-modal-title"
+        aria-describedby="manage-kb-modal-description"
+      >
+        <ModalHeader
+          title="Manage Knowledge Base Associations"
+          labelId="manage-kb-modal-title"
+          description="Select which knowledge bases this assistant should have access to."
+        />
+        <ModalBody id="manage-kb-modal-description">
+          <DualListSelector>
+            <DualListSelectorPane
+              title="Available Knowledge Bases"
+              status={`${availableKBs.filter((option) => option.selected && option.isVisible).length} of ${availableKBs.filter((option) => option.isVisible).length} options selected`}
+            >
+              <DualListSelectorList>
+                {availableKBs.map((option, index) =>
+                  option.isVisible ? (
+                    <DualListSelectorListItem
+                      key={option.id}
+                      isSelected={option.selected}
+                      id={`available-option-${index}`}
+                      onOptionSelect={(e) => onOptionSelect(e, index, false)}
+                    >
+                      {option.text}
+                    </DualListSelectorListItem>
+                  ) : null
+                )}
+              </DualListSelectorList>
+            </DualListSelectorPane>
+
+            <DualListSelectorControlsWrapper>
+              <DualListSelectorControl
+                isDisabled={!availableKBs.some((option) => option.selected)}
+                onClick={() => moveSelected(true)}
+                aria-label="Add selected"
+              >
+                <AngleRightIcon />
+              </DualListSelectorControl>
+              <DualListSelectorControl
+                isDisabled={availableKBs.length === 0}
+                onClick={() => moveAll(true)}
+                aria-label="Add all"
+              >
+                <AngleDoubleRightIcon />
+              </DualListSelectorControl>
+              <DualListSelectorControl
+                isDisabled={assignedKBs.length === 0}
+                onClick={() => moveAll(false)}
+                aria-label="Remove all"
+              >
+                <AngleDoubleLeftIcon />
+              </DualListSelectorControl>
+              <DualListSelectorControl
+                onClick={() => moveSelected(false)}
+                isDisabled={!assignedKBs.some((option) => option.selected)}
+                aria-label="Remove selected"
+              >
+                <AngleLeftIcon />
+              </DualListSelectorControl>
+            </DualListSelectorControlsWrapper>
+
+            <DualListSelectorPane
+              title="Associated Knowledge Bases"
+              status={`${assignedKBs.filter((option) => option.selected && option.isVisible).length} of ${assignedKBs.filter((option) => option.isVisible).length} options selected`}
+              isChosen
+            >
+              <DualListSelectorList>
+                {assignedKBs.map((option, index) =>
+                  option.isVisible ? (
+                    <DualListSelectorListItem
+                      key={option.id}
+                      isSelected={option.selected}
+                      id={`chosen-option-${index}`}
+                      onOptionSelect={(e) => onOptionSelect(e, index, true)}
+                    >
+                      {option.text}
+                    </DualListSelectorListItem>
+                  ) : null
+                )}
+              </DualListSelectorList>
+            </DualListSelectorPane>
+          </DualListSelector>
+        </ModalBody>
+        <ModalFooter>
           <Button
             key="savekb"
             variant="primary"
             onClick={saveKnowledgeBaseAssignments}
           >
             Save Changes
-          </Button>,
+          </Button>
           <Button key="cancel" variant="link" onClick={handleKBModalToggle}>
             Cancel
-          </Button>,
-        ]}
-      >
-        <DualListSelector>
-          <DualListSelectorPane
-            title="Available Knowledge Bases"
-            status={`${availableKBs.filter((option) => option.selected && option.isVisible).length} of ${availableKBs.filter((option) => option.isVisible).length} options selected`}
-          >
-            <DualListSelectorList>
-              {availableKBs.map((option, index) =>
-                option.isVisible ? (
-                  <DualListSelectorListItem
-                    key={option.id}
-                    isSelected={option.selected}
-                    id={`available-option-${index}`}
-                    onOptionSelect={(e) => onOptionSelect(e, index, false)}
-                  >
-                    {option.text}
-                  </DualListSelectorListItem>
-                ) : null
-              )}
-            </DualListSelectorList>
-          </DualListSelectorPane>
-
-          <DualListSelectorControlsWrapper>
-            <DualListSelectorControl
-              isDisabled={!availableKBs.some((option) => option.selected)}
-              onClick={() => moveSelected(true)}
-              aria-label="Add selected"
-            >
-              <AngleRightIcon />
-            </DualListSelectorControl>
-            <DualListSelectorControl
-              isDisabled={availableKBs.length === 0}
-              onClick={() => moveAll(true)}
-              aria-label="Add all"
-            >
-              <AngleDoubleRightIcon />
-            </DualListSelectorControl>
-            <DualListSelectorControl
-              isDisabled={assignedKBs.length === 0}
-              onClick={() => moveAll(false)}
-              aria-label="Remove all"
-            >
-              <AngleDoubleLeftIcon />
-            </DualListSelectorControl>
-            <DualListSelectorControl
-              onClick={() => moveSelected(false)}
-              isDisabled={!assignedKBs.some((option) => option.selected)}
-              aria-label="Remove selected"
-            >
-              <AngleLeftIcon />
-            </DualListSelectorControl>
-          </DualListSelectorControlsWrapper>
-
-          <DualListSelectorPane
-            title="Associated Knowledge Bases"
-            status={`${assignedKBs.filter((option) => option.selected && option.isVisible).length} of ${assignedKBs.filter((option) => option.isVisible).length} options selected`}
-            isChosen
-          >
-            <DualListSelectorList>
-              {assignedKBs.map((option, index) =>
-                option.isVisible ? (
-                  <DualListSelectorListItem
-                    key={option.id}
-                    isSelected={option.selected}
-                    id={`chosen-option-${index}`}
-                    onOptionSelect={(e) => onOptionSelect(e, index, true)}
-                  >
-                    {option.text}
-                  </DualListSelectorListItem>
-                ) : null
-              )}
-            </DualListSelectorList>
-          </DualListSelectorPane>
-        </DualListSelector>
+          </Button>
+        </ModalFooter>
       </Modal>
     </div>
   );

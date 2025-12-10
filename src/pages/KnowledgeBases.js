@@ -11,7 +11,9 @@ import {
   PanelMainBody,
   Title,
   Modal,
-  ModalVariant,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from '@patternfly/react-core';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
@@ -161,12 +163,44 @@ const KnowledgeBases = () => {
                 </Table>
               </div>
               <Modal
-                variant={ModalVariant.medium}
-                title="Create a new knowledge base"
-                description="Enter the information below to create a new knowledge base."
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                actions={[
+                aria-labelledby="create-kb-modal-title"
+                aria-describedby="create-kb-modal-description"
+              >
+                <ModalHeader
+                  title="Create a new knowledge base"
+                  labelId="create-kb-modal-title"
+                  description="Enter the information below to create a new knowledge base."
+                />
+                <ModalBody id="create-kb-modal-description">
+                  <Form>
+                    <FormGroup>
+                      <FormGroup label="Knowledge Base Name" isRequired>
+                        <TextInput
+                          id="name"
+                          isRequired
+                          type="text"
+                          name="name"
+                          value={knowledgeBaseData.name}
+                          onChange={handleChange}
+                        />
+                      </FormGroup>
+                      <FormGroup label="Description" isRequired>
+                        <TextArea
+                          id="description"
+                          isRequired
+                          name="description"
+                          value={knowledgeBaseData.description}
+                          onChange={handleChange}
+                          autoResize
+                          resizeOrientation="vertical"
+                        />
+                      </FormGroup>
+                    </FormGroup>
+                  </Form>
+                </ModalBody>
+                <ModalFooter>
                   <Button
                     key="addkb"
                     variant="primary"
@@ -177,41 +211,15 @@ const KnowledgeBases = () => {
                     }
                   >
                     Confirm
-                  </Button>,
+                  </Button>
                   <Button
                     key="cancel"
                     variant="link"
                     onClick={handleModalToggle}
                   >
                     Cancel
-                  </Button>,
-                ]}
-              >
-                <Form>
-                  <FormGroup>
-                    <FormGroup label="Knowledge Base Name" isRequired>
-                      <TextInput
-                        id="name"
-                        isRequired
-                        type="text"
-                        name="name"
-                        value={knowledgeBaseData.name}
-                        onChange={handleChange}
-                      />
-                    </FormGroup>
-                    <FormGroup label="Description" isRequired>
-                      <TextArea
-                        id="description"
-                        isRequired
-                        name="description"
-                        value={knowledgeBaseData.description}
-                        onChange={handleChange}
-                        autoResize
-                        resizeOrientation="vertical"
-                      />
-                    </FormGroup>
-                  </FormGroup>
-                </Form>
+                  </Button>
+                </ModalFooter>
               </Modal>
             </div>
           )}
