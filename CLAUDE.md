@@ -246,6 +246,7 @@ done
 - **TypeScript compatibility**: `react-scripts@5.0.1` only supports TypeScript ^3.2.1 || ^4. Do NOT upgrade to TypeScript 5 until react-scripts is upgraded to a compatible version
 - **PatternFly v6 breaking changes**:
   - `TextContent` component replaced with `Content` - update all imports and usages
+  - `Text` and `TextVariants` removed - replace with standard HTML elements (h1, h3, h4, h5, p, small)
   - After upgrading, run `npm run build` to catch component API changes
 - **Peer dependency warnings**: Major version updates (React 19, PatternFly 6, etc.) may cause peer dependency warnings - these are expected during transitions
 - **Testing**: For major version updates, test the application locally before merging
