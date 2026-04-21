@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tangerine-frontend
+  labels:
+    app.kubernetes.io/name: tangerine-frontend
+spec:
+  selector:
+    app.kubernetes.io/name: tangerine-frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
