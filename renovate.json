@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    ":disableMajorUpdates",
+    "github>konflux-ci/mintmaker-presets:cve-automerge-all",
+    ":npm",
+    ":group:react"
+  ],
+  "dockerfile": {
+    "managerFilePatterns": ["/Dockerfile$/"]
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "registry.access.redhat.com/ubi9/nodejs-24",
+        "registry.access.redhat.com/ubi9/nodejs-24-minimal"
+      ],
+      "versioning": "redhat"
+    },
+    {
+      "groupName": "patternfly packages",
+      "matchPackageNames": ["@patternfly/**"]
+    }
+  ]
+}

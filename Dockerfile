@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-22 AS builder
+FROM registry.access.redhat.com/ubi9/nodejs-22:9.8-1777524498 AS builder
 
 ADD package.json $HOME
 ADD package-lock.json $HOME
@@ -17,7 +17,7 @@ ENV PORT=3000
 RUN npm -d install
 RUN npm run -d build
 
-FROM registry.access.redhat.com/ubi9/nodejs-22-minimal
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:9.8-1777531918
 
 COPY --from=builder $HOME/build $HOME/build
 
@@ -25,7 +25,7 @@ RUN npm install serve
 
 USER 0
 RUN chown -R 1001:0 ${APP_ROOT} && chmod -R ug+rwx ${APP_ROOT} && \
-    fix-permissions ${APP_ROOT}
+  fix-permissions ${APP_ROOT}
 
 USER 1001
 
