@@ -1,96 +1,126 @@
 # AGENTS.md
 
-## Commands
+## Project Overview
 
-### Development Commands
+Tangerine Frontend is a slim, lightweight RAG (Retrieval Augmented Generation) web application for
+creating and managing AI-powered chatbot assistants. It provides a React SPA through which users
+define assistants, associate them with knowledge bases, upload documents, and hold streaming chat
+sessions against those knowledge bases. The app is distributed as a container image built with
+`build.sh` and published to Quay.io; it is licensed under Apache 2.0 and maintained under the Red
+Hat Insights organization.
 
-- `npm install` - Install dependencies
-- `npm start` - Start development server (runs on <http://localhost:3000>)
-- `npm run build` - Build for production
-- `npm test` - Run tests
+## Dependencies
 
-### Container Development
+**Runtime:**
 
-- `docker compose up --build` - Start with Docker Compose (Linux only, not supported on Mac)
-- Backend dependency: Requires tangerine-backend running on port 8000
+- React 19.2.6, React Router DOM 7, axios
+- PatternFly React Core 6.4.3 (Red Hat design system)
+- react-markdown + remark-gfm (chat message rendering)
 
-#### Full Stack Setup with Docker
+**Build / Toolchain:**
 
-To run both backend and frontend together:
+- react-scripts 5.0.1 (Create React App, no ejection)
+- npm (package manager)
+- TypeScript 4.9.5 — present as a type-checker only; it does **not** participate in the build
 
-1. Clone the backend: `git clone https://github.com/RedHatInsights/tangerine-backend`
-2. In the backend directory: `docker compose up --build`
-3. In this frontend directory: `docker compose up --build`
+**Dev / Test:**
 
-### Production Build
+- ESLint 8.57.1, extends `react-app` + `react-app/jest`; `@typescript-eslint` plugins v5
+- Prettier 3.x
+- Jest (via react-scripts)
 
-- `./build.sh` - Production container build script (requires QUAY_USER and QUAY_TOKEN env vars)
+## Development Commands
 
-## Architecture Overview
+See [Development Setup][readme-dev] in the README for the full command reference, including Docker
+Compose setup and the complete development tooling section.
 
-### Core Application Structure
+**Agent-specific commands** (Konflux dependency management via `gh`):
 
-This is a React-based RAG (Retrieval Augmented Generation) frontend for managing AI chat assistants. The app follows a page-based routing structure with separated knowledge base and assistant management:
+```bash
+# List all open Konflux PRs
+gh pr list --author "app/red-hat-konflux" --json number,title,mergeable,state --state open
 
-- **Home** (`/`) - Assistant management dashboard with CRUD operations
-- **Knowledge Bases** (`/knowledgebases`) - Knowledge base management dashboard
-- **Knowledge Base Details** (`/knowledgebases/:kbId`) - View/edit KB configuration and document upload
-- **Assistant Details** (`/assistants/:assistantId`) - View/edit assistant configuration and KB associations
-- **Chat Interface** (`/assistants/:assistantId/chat`) - Real-time streaming chat with assistants
+# Merge a single PR with admin privileges
+gh pr merge <pr-number> --squash --delete-branch --admin
+```
 
-### Key Components
+See [Managing Red Hat Konflux Dependency Updates](#managing-red-hat-konflux-dependency-updates)
+below for full procedures.
 
-- `App.js` - Main router with Header component and five routes
-- `Header.js` - Navigation header with links to Assistants and Knowledge Bases
-- `Main.js` - Dashboard for listing, creating, and deleting assistants
-- `Assistant.js` - Detailed view for assistant management and knowledge base associations (uses DualListSelector)
-- `KnowledgeBases.js` - Dashboard for listing, creating, and deleting knowledge bases
-- `KnowledgeBase.js` - Detailed view for KB management and document upload/deletion
-- `Chat.js` - Streaming chat interface with markdown rendering and feedback system
-- `SearchInfo.js` - Component for displaying search metadata from RAG responses
+## Architecture
 
-### Data Flow Patterns
+See [ARCHITECTURE.md][architecture] for the full design document.
 
-- All API communication uses axios for standard requests and fetch for streaming
-- Assistant state management through React hooks with local state
-- Chat implements streaming responses with TextDecoderStream
-- Session tracking with crypto.randomUUID() for chat sessions
-- File uploads use FormData for document management
+The app is a standard Create React App SPA. `src/App.js` is the entry point; it mounts a
+`Header.js` navigation bar and five React Router routes mapping to page-level components:
+`Main.js` (assistants dashboard), `KnowledgeBases.js`, `KnowledgeBase.js`, `Assistant.js`, and
+`Chat.js`. All API communication uses axios for standard requests and `fetch` with
+`TextDecoderStream` for streaming chat. There is no global state manager — each page component
+owns its state via `useState` hooks.
 
-### UI Framework
+## Code Style
 
-Uses PatternFly React components throughout:
+**Formatter:** Prettier 3.x — authoritative config in `.prettierrc`:
 
-- Forms, modals, tables, panels for UI structure
-- Consistent styling with PatternFly design system
-- Markdown rendering with react-markdown and remark-gfm
-- **Important**: Always use PatternFly React components for new UI features (<https://github.com/patternfly/patternfly-react>)
-- Component documentation: <https://www.patternfly.org/components/all-components>
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "trailingComma": "es5"
+}
+```
 
-### Backend Integration
+Prettier runs on save via the pre-commit hook (`--write`, covers `.md` files too).
 
-- Proxy configured for `http://127.0.0.1:8000/` in package.json
-- **Assistant API endpoints**: `/api/assistants`, `/api/assistants/{id}`, `/api/assistants/{id}/knowledgebases`
-- **Knowledge Base API endpoints**: `/api/knowledgebases`, `/api/knowledgebases/{id}`, `/api/knowledgebases/{id}/documents`
-- **Other endpoints**: `/api/feedback`, `/api/assistantDefaults`
-- Supports streaming chat responses and file uploads
-- Document support: .md, .txt, .pdf files
-- **New Architecture**: Many-to-many relationship between assistants and knowledge bases
+**Linter:** ESLint 8.57.1, config extends `react-app` + `react-app/jest`. The
+`@typescript-eslint` plugins (v5) are present but TypeScript strict-mode checking is opt-in via
+`tsc`; ESLint remains the enforced gate. ESLint runs `--fix` on every commit.
 
-### State Management
+**Language:** All source files are `.js`. Do not create `.ts` or `.tsx` files — TypeScript is used
+only as an optional type-checker, not as a source language.
 
-- Component-level state with useState hooks
-- No global state management (Redux, Context, etc.)
-- Real-time updates through streaming API responses
-- Feedback tracking for chat interactions
+**UI components:** Always use [PatternFly React][patternfly-docs] components for new UI. Do not
+introduce custom CSS solutions for layout or structure that PatternFly already covers.
+
+## Common Mistakes
+
+1. **Using TypeScript as a source language.** All source files are `.js`. TypeScript is present
+   only for optional type-checking (`tsc`). Adding `.ts`/`.tsx` files or importing TypeScript-only
+   constructs will break the react-scripts build.
+
+2. **Upgrading TypeScript to v5.** `react-scripts@5.0.1` only supports TypeScript
+   `^3.2.1 || ^4`. Do not bump the `typescript` package to v5 until react-scripts is upgraded to
+   a compatible version. Konflux PRs that propose this upgrade must be rejected or held.
+
+3. **Using deprecated PatternFly v5 component APIs.** PatternFly v6 introduced breaking changes:
+   - `TextContent` → `Content`
+   - `Text` and `TextVariants` removed → use plain HTML elements (`h1`, `p`, `small`, etc.)
+   - `Modal` no longer accepts `title`/`description`/`actions` props → use `ModalHeader`,
+     `ModalBody`, `ModalFooter`
+
+   After any PatternFly upgrade, run `npm run build` to surface component API errors.
+
+4. **Skipping `npm install` after combining Konflux PRs.** Merging multiple dependency branches
+   leaves `package-lock.json` in an inconsistent state. Always run `npm install` and commit the
+   regenerated lockfile before pushing a combined branch.
+
+5. **Inline links in markdown.** This file (and all markdown committed to the repo) is formatted
+   by Prettier on commit. Use reference-style links to keep lines within the 80-character print
+   width and pass the pre-commit hook cleanly.
+
+6. **Assuming Docker Compose works on macOS.** The `docker compose up --build` frontend workflow
+   is Linux-only. On macOS, run `npm start` directly and point it at a separately running backend.
 
 ## Managing Red Hat Konflux Dependency Updates
 
-The `red-hat-konflux` bot regularly opens PRs to update npm dependencies. These PRs typically update `package.json` and `package-lock.json`.
+The `red-hat-konflux` bot regularly opens PRs to update npm dependencies. These PRs typically
+update `package.json` and `package-lock.json`.
 
 ### Strategy 1: Merge Individual PRs (Preferred for Small Batches)
 
-When there are only a few open konflux PRs, use the `gh` CLI to merge them with admin privileges:
+When there are only a few open Konflux PRs, use the `gh` CLI to merge them with admin privileges:
 
 ```bash
 # List all open konflux PRs
@@ -102,11 +132,12 @@ for pr in 61 62 63; do
 done
 ```
 
-**Note**: PRs that are behind the base branch or have conflicts will fail to merge and need conflict resolution.
+**Note**: PRs that are behind the base branch or have conflicts will fail to merge and need
+conflict resolution.
 
 ### Strategy 2: Combine into Single PR (For Large Batches)
 
-When there are 15+ open konflux PRs, combine them into a single PR:
+When there are 15+ open Konflux PRs, combine them into a single PR:
 
 1. **Create a combined branch**:
 
@@ -126,7 +157,7 @@ When there are 15+ open konflux PRs, combine them into a single PR:
    gh pr list --author "app/red-hat-konflux" --json number,headRefName,title --state open
    ```
 
-4. **Merge all konflux branches sequentially (oldest to newest)**:
+4. **Merge all Konflux branches sequentially (oldest to newest)**:
 
    ```bash
    # Merge each branch - conflicts are expected
@@ -137,7 +168,8 @@ When there are 15+ open konflux PRs, combine them into a single PR:
 
 5. **Resolve merge conflicts**:
    - **For `package.json`**: Choose the newer/higher version of each dependency
-   - **For `package-lock.json`**: Use `git checkout --theirs package-lock.json` to take the incoming version
+   - **For `package-lock.json`**: Use `git checkout --theirs package-lock.json` to take the
+     incoming version
    - **After resolving conflicts**:
 
      ```bash
@@ -147,7 +179,7 @@ When there are 15+ open konflux PRs, combine them into a single PR:
 
    - **Pattern**: When choosing between versions, always use the higher version number
 
-6. **Regenerate package-lock.json after all merges**:
+6. **Regenerate `package-lock.json` after all merges**:
 
    ```bash
    npm install
@@ -164,9 +196,15 @@ When there are 15+ open konflux PRs, combine them into a single PR:
 
 8. **Wait for individual PRs to auto-close**:
    - After the combined PR is merged, wait ~1 minute
-   - GitHub will automatically close most/all of the individual konflux PRs since their changes are now in main
-   - Check if any PRs remain open: `gh pr list --author "app/red-hat-konflux" --state open`
-   - Only manually close PRs that didn't auto-close:
+   - GitHub will automatically close most/all of the individual Konflux PRs since their changes
+     are now in main
+   - Check if any PRs remain open:
+
+     ```bash
+     gh pr list --author "app/red-hat-konflux" --state open
+     ```
+
+   - Only manually close PRs that did not auto-close:
 
      ```bash
      gh pr close <pr-number> --comment "Closing - changes included in combined PR #<combined-pr-number>"
@@ -190,7 +228,8 @@ When PRs have conflicts (typically after other PRs have been merged):
 
 3. **Resolve conflicts**:
    - **For `package.json`**: Choose the newer version of each dependency
-   - **For `package-lock.json`**: Use `git checkout --theirs package-lock.json` to take main's version
+   - **For `package-lock.json`**: Use `git checkout --theirs package-lock.json` to take main's
+     version
    - **Pattern**: When choosing between versions, use the higher version number
 
 4. **Commit and push**:
@@ -239,21 +278,34 @@ for pr in 61 62 63 64 65; do
 done
 ```
 
-**Why oldest first?**: Earlier PRs may update dependencies that later PRs also touch. Merging in order minimizes cascading conflicts.
+**Why oldest first?**: Earlier PRs may update dependencies that later PRs also touch. Merging in
+order minimizes cascading conflicts.
 
 ### Important Considerations
 
 - **Conflict resolution strategy**: When in doubt, choose the newer/higher version of dependencies
-- **Package lock regeneration**: Always run `npm install` after combining multiple PRs to ensure consistency
-- **TypeScript compatibility**: `react-scripts@5.0.1` only supports TypeScript ^3.2.1 || ^4. Do NOT upgrade to TypeScript 5 until react-scripts is upgraded to a compatible version
+- **Package lock regeneration**: Always run `npm install` after combining multiple PRs to ensure
+  consistency
+- **TypeScript compatibility**: `react-scripts@5.0.1` only supports TypeScript `^3.2.1 || ^4`.
+  Do NOT upgrade to TypeScript 5 until react-scripts is upgraded to a compatible version
 - **PatternFly v6 breaking changes**:
-  - `TextContent` component replaced with `Content` - update all imports and usages
-  - `Text` and `TextVariants` removed - replace with standard HTML elements (h1, h3, h4, h5, p, small)
-  - `Modal` API changed - use `ModalHeader`, `ModalBody`, and `ModalFooter` instead of title/description/actions props
+  - `TextContent` component replaced with `Content` — update all imports and usages
+  - `Text` and `TextVariants` removed — replace with standard HTML elements (`h1`, `h3`, `h4`,
+    `h5`, `p`, `small`)
+  - `Modal` API changed — use `ModalHeader`, `ModalBody`, and `ModalFooter` instead of
+    `title`/`description`/`actions` props
   - After upgrading, run `npm run build` to catch component API changes
-- **Peer dependency warnings**: Major version updates (React 19, PatternFly 6, etc.) may cause peer dependency warnings - these are expected during transitions
+- **Peer dependency warnings**: Major version updates (React 19, PatternFly 6, etc.) may cause
+  peer dependency warnings — these are expected during transitions
 - **Testing**: For major version updates, test the application locally before merging
-- **Verify npm install**: After combining PRs, run `npm install` to ensure there are no peer dependency conflicts that would break the build
-- **Admin flag**: The `--admin` flag bypasses branch protection rules - use only for automated dependency updates
+- **Verify npm install**: After combining PRs, run `npm install` to ensure there are no peer
+  dependency conflicts that would break the build
+- **Admin flag**: The `--admin` flag bypasses branch protection rules — use only for automated
+  dependency updates
 - **Timing**: Some PRs need a few seconds after pushing before GitHub recognizes them as mergeable
-- **Breaking changes**: Major version updates may require code changes - document these in the PR description
+- **Breaking changes**: Major version updates may require code changes — document these in the PR
+  description
+
+[readme-dev]: README.md#development-environment-setup
+[architecture]: ARCHITECTURE.md
+[patternfly-docs]: https://www.patternfly.org/components/all-components
