@@ -189,13 +189,29 @@ function Assistant() {
   };
 
   const saveKnowledgeBaseAssignments = () => {
+    const currentIds = (assistantInfo.knowledgebases || []).map((kb) => kb.id);
     const newIds = assignedKBs.map((kb) => kb.id);
 
-    // Send all knowledge base IDs in a single request
-    axios
-      .post(`/api/assistants/${assistantId}/knowledgebases`, {
-        knowledgebase_ids: newIds,
-      })
+    const toAdd = newIds.filter((id) => !currentIds.includes(id));
+    const toRemove = currentIds.filter((id) => !newIds.includes(id));
+
+    const requests = [];
+    if (toAdd.length > 0) {
+      requests.push(
+        axios.post(`/api/assistants/${assistantId}/knowledgebases`, {
+          knowledgebase_ids: toAdd,
+        })
+      );
+    }
+    if (toRemove.length > 0) {
+      requests.push(
+        axios.delete(`/api/assistants/${assistantId}/knowledgebases`, {
+          data: { knowledgebase_ids: toRemove },
+        })
+      );
+    }
+
+    Promise.all(requests)
       .then(() => {
         getAssistantInfo();
         handleKBModalToggle();
