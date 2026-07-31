@@ -44,6 +44,12 @@ const SearchInfo = ({ searchData }) => {
         {searchData.map((content, index) => {
           const title = content.metadata.title;
           const citation_url = content.metadata.citation_url;
+          // citation_url originates from indexed document metadata (untrusted);
+          // restrict to http(s) so a contributor-supplied javascript: / data:
+          // URL cannot execute in the operator's session when the link is clicked.
+          const safe_citation_url = /^https?:\/\//i.test(citation_url || '')
+            ? citation_url
+            : null;
           const pageContent = content.page_content;
 
           return (
@@ -55,13 +61,13 @@ const SearchInfo = ({ searchData }) => {
               <Content>
                 <h5 style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
                   {title}
-                  {citation_url && citation_url !== 'None' && (
+                  {safe_citation_url && (
                     <Button
                       variant="link"
                       size="sm"
                       icon={<ExternalLinkSquareAltIcon />}
                       component="a"
-                      href={citation_url}
+                      href={safe_citation_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Open citation for ${title}`}

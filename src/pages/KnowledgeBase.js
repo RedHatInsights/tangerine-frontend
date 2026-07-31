@@ -363,19 +363,20 @@ function KnowledgeBase() {
                                   Source: {file.source} | Path: {file.full_path}
                                 </small>
                               </div>
-                              {file.citation_url &&
-                                file.citation_url !== 'None' && (
-                                  <Button
-                                    variant="link"
-                                    size="sm"
-                                    icon={<ExternalLinkSquareAltIcon />}
-                                    component="a"
-                                    href={file.citation_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label={`Open citation for ${file.title}`}
-                                  />
-                                )}
+                              {/^https?:\/\//i.test(
+                                file.citation_url || ''
+                              ) && (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  icon={<ExternalLinkSquareAltIcon />}
+                                  component="a"
+                                  href={file.citation_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`Open citation for ${file.title}`}
+                                />
+                              )}
                               <Button
                                 variant="plain"
                                 aria-label={`Delete ${file.title}`}
