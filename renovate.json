@@ -1,26 +1,39 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "minimumReleaseAge": "7 days",
   "extends": [
     ":disableMajorUpdates",
-    "github>konflux-ci/mintmaker-presets:cve-automerge-all",
-    ":npm",
-    ":group:react"
+    "helpers:disableTypesNodeMajor",
+    "group:react",
+    "github>konflux-ci/mintmaker-presets:cve-automerge-high"
   ],
-  "dockerfile": {
-    "managerFilePatterns": ["/Dockerfile$/"]
-  },
   "packageRules": [
     {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": [
-        "registry.access.redhat.com/ubi9/nodejs-24",
-        "registry.access.redhat.com/ubi9/nodejs-24-minimal"
-      ],
-      "versioning": "redhat"
+      "description": "Group patternfly depedencies",
+      "matchManagers": [ "npm" ],
+      "matchPackageNames": [ "@patternfly/**" ],
+      "matchUpdateTypes": [ "minor", "patch" ],
+      "groupName": "patternfly packages"
     },
     {
-      "groupName": "patternfly packages",
-      "matchPackageNames": ["@patternfly/**"]
+      "description": "Group non-major npm development dependencies",
+      "matchManagers": [ "npm" ],
+      "matchDepTypes": [ "devDependencies" ],
+      "matchUpdateTypes": [ "minor", "patch" ],
+      "groupName": "npm development dependencies"
+    },
+    {
+      "description": "Group non-major npm production dependencies",
+      "matchManagers": [ "npm" ],
+      "matchDepTypes": [ "dependencies", "optionalDependencies" ],
+      "matchUpdateTypes": [ "minor", "patch" ],
+      "groupName": "npm production dependencies"
+    },
+    {
+      "description": "Group container image updates",
+      "matchManagers": [ "dockerfile" ],
+      "matchUpdateTypes": [ "digest", "minor", "patch", "pinDigest" ],
+      "groupName": "container images"
     }
   ]
 }
