@@ -1,34 +1,24 @@
-FROM registry.access.redhat.com/ubi9/nodejs-22:9.8-1777524498 AS builder
+FROM registry.access.redhat.com/hi/nodejs:22.23.2-1790001698 AS builder
 
-ADD package.json $HOME
-ADD package-lock.json $HOME
-ADD src $HOME/src
-ADD public $HOME/public
+USER root
 
-USER 0
-RUN fix-permissions ./
-USER 1001
+WORKDIR /app
 
 ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
 
-# Install the dependencies
-RUN npm -d install
-RUN npm run -d build
+COPY package*.json .
+RUN npm ci
 
-FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:9.8-1777531918
+COPY . .
+RUN npm run build
 
-COPY --from=builder $HOME/build $HOME/build
+FROM registry.access.redhat.com/hi/nodejs:22.23.2-1790001698
 
-RUN npm install serve
-
-USER 0
-RUN chown -R 1001:0 ${APP_ROOT} && chmod -R ug+rwx ${APP_ROOT} && \
-  fix-permissions ${APP_ROOT}
-
-USER 1001
+WORKDIR /app
+COPY package.json ./
+COPY --from=builder /app/node_modules node_modules
+COPY --from=builder /app/build build
 
 EXPOSE 3000
 
-CMD ["serve", "-s", "./build"]
+CMD ["node", "./node_modules/.bin/serve", "--no-clipboard", "--single", "./build"]
