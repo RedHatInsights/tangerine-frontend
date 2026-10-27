@@ -267,11 +267,6 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-      when:
-      - input: "false"
-        operator: in
-        values:
-        - "true"
     - name: build-source-image
       params:
       - name: BINARY_IMAGE
